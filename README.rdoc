@@ -6,11 +6,11 @@
 
 == Description
 
-TO-DO: A Ruby SHA3 wrapper
+A native SHA3 Ruby gem.
 
-== Features
+== Features/Status/Etc.
 
-A few...
+4th Oct. 2012: This is very alpha quality code, and not suitable for production.
 
 == Install
 
