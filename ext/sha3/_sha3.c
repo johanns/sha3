@@ -5,6 +5,14 @@
 
 VALUE mSHA3;
 
+/* @overload digest(data, data_len, hashbit_len)
+ * 
+ * @param data        [String] The DATA!
+ * @param data_len    [String] The number of input bits provided in the input data.
+ * @param hashbit_len [Fixnum] The desired number of output bits (i.e., 224, 256, 384, 512).
+ *
+ * @return [String] Computed hash
+*/
 VALUE m_sha3_digest(VALUE self, VALUE data, VALUE datalen, VALUE hashbitlen)
 {
   int hlen = NUM2INT(hashbitlen);

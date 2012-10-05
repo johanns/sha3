@@ -7,13 +7,21 @@
 
 == Description
 
-TODO: Description
+TO-DO: A Ruby SHA3 wrapper
 
 == Features
 
 == Examples
 
   require 'sha3'
+
+  # Basic Usage
+  SHA3::digest_224("Crazy Man's Utopia")
+  => "\xF8\x1A4\xACW6\v\x01A \x99\x11i\x91\xB3q\xB5\xF5\x04\xD4\x88fn\xC6\xA7\xEA\xBBb"
+
+  # A bit more advanced; allows you to specify data length (2nd param), and desired hash bit length (3rd param)
+  SHA3::digest("Crazy Man's Utopia", 36, 512)
+  => "\xBC\x9Dl\xEA \x83\xC2\x19\xC8\r/<!\xE4\xE3\x9E3(\xA1\x04\xB6\xBA6C\xE6\xA3\xC1\xCE\xF1EG/\xA9\xAD\xF1\x89\x97yA3\x98\x9FtX\xE7\x7F\xF4a\xD1\x1C\xFF\xCE\xA8\x84\x05\x91\x0310@\xBC\xF75b"
 
 == Requirements
 
