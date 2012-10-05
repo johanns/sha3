@@ -1,0 +1,28 @@
+= sha3
+
+* {Homepage}[https://github.com/johanns/sha3#readme]
+* {Issues}[https://github.com/johanns/sha3/issues]
+* {Documentation}[http://rubydoc.info/gems/sha3/frames]
+* {Email}[mailto:io+sha3 at jsani.com]
+
+== Description
+
+TODO: Description
+
+== Features
+
+== Examples
+
+  require 'sha3'
+
+== Requirements
+
+== Install
+
+  $ gem install sha3
+
+== Copyright
+
+Copyright (c) 2012 Johanns Gregorian
+
+See LICENSE.txt for details.

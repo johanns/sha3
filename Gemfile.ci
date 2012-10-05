@@ -1,0 +1,8 @@
+source "http://rubygems.org"
+
+gemspec
+
+gem 'rubygems-tasks', '> 0.2'
+gem 'rake', '> 0.9'
+gem 'rspec', '~> 2.11'
+gem 'yard', '~> 0.8'
