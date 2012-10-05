@@ -1,8 +1,8 @@
 require 'spec_helper'
 require 'sha3'
 
-describe "SHA3::digest (224) hashes" do
-  it "should match (224) short message test vectors" do
+describe "SHA3 (224) short message test vectors" do
+  it "should match SHA3::digest hashes" do
     SHA3::digest(["00"].pack("H*"), 0, 224).unpack("H*").first.should(eq("f71837502ba8e10837bdd8d365adb85591895602fc552b48b7390abd"))
     SHA3::digest(["00"].pack("H*"), 1, 224).unpack("H*").first.should(eq("860e3ec314c5cbf19c1a4314e9ea8cb85cecd18bd850b42f5c6f2a07")) 
     SHA3::digest(["c0"].pack("H*"), 2, 224).unpack("H*").first.should(eq("6b22cddbd1366f7b8db2026aee8a0afa86b323aed7aa270ad928d1c5")) 
