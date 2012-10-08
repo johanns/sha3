@@ -2,3 +2,7 @@
 
 * Initial release:
 
+=== 0.1.1 / 2012-10-07
+
+* Replaced Keccak reference code with optimized (~10x faster)
+
