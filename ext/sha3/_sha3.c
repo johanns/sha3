@@ -52,7 +52,7 @@ void Init_sha3_n()
   rb_define_module_function(mSHA3, "digest", m_sha3_digest, 3);
 
   // SHA3::Digest (class) methods
-  rb_define_alloc_function(cDigest, c_digest_alloc);
+  rb_define_alloc_func(cDigest, c_digest_alloc);
   rb_define_method(cDigest, "initialize", c_digest_init, -1);
   rb_define_method(cDigest, "update", c_digest_update, 1);
   rb_define_method(cDigest, "reset", c_digest_reset, 0);

@@ -7,3 +7,7 @@ rvm:
   - 1.8.7
 
 gemfile: Gemfile.ci
+
+branches:
+  only:
+    - master
