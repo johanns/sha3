@@ -73,9 +73,9 @@ Valid hash bit-lengths are: *224*, *256*, *384*, *512*. You may also use corresp
 
 Call +rake+ to run the included RSpec tests.
 
-Please note that only a small subset of test vectors are included in this source repository; however, the complete test vectors suite is available for download. Simply run the +test.sh+ shell script (available in the root of source directory) to generate full bit-length RSpec test files.
+Only a small subset of test vectors are included in the source repository; however, the complete test vectors suite is available for download. Simply run the +test.sh+ shell script (available in the root of source directory) to generate full bit-length RSpec test files.
 
-  sh test.sh
+  sh tests.sh
 
 == Rubies
 
