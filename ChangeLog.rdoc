@@ -6,3 +6,6 @@
 
 * Replaced Keccak reference code with optimized (~10x faster)
 
+=== 0.2.0 / 2012-11-1
+
+* SHA3::Digest: A proper ::Digest subclass.

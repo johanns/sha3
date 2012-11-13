@@ -47,7 +47,7 @@ begin
     ext.name = 'sha3_n'
     ext.ext_dir = 'ext/sha3'
     ext.tmp_dir = 'tmp'
-    ext.source_pattern = "*.{c,cpp}"
+    ext.source_pattern = "*.{c}"
   end
 rescue LoadError => e
   task :compile do

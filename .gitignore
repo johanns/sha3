@@ -1,5 +1,6 @@
 *.gem
 *.rbc
+*.rbx
 .bundle
 .config
 coverage
@@ -17,10 +18,6 @@ tmp/
 _yardoc
 doc/
 
-install.sh
 *.lock
-
-*.bundle
-
-spec/bench.rb
-.rbx/
+*.so
+Makefile
