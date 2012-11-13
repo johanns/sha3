@@ -1,44 +1,105 @@
-= sha3 {<img src="https://secure.travis-ci.org/johanns/sha3.png" alt="Build Status" />}[http://travis-ci.org/johanns/sha3]
+= sha3 
 
-* {Homepage}[https://github.com/johanns/sha3#readme]
-* {Issues}[https://github.com/johanns/sha3/issues]
-* {Documentation}[http://rubydoc.info/gems/sha3/frames]
+{<img src="https://secure.travis-ci.org/johanns/sha3.png" alt="Build Status" />}[http://travis-ci.org/johanns/sha3]
+Home :: https://github.com/johanns/sha3#readme
+Issues :: https://github.com/johanns/sha3/issues
+Documentation :: http://rubydoc.info/gems/sha3/frames
 
 == Description
 
-A native SHA3 Ruby gem.
+<em>SHA3 for Ruby</em> is a native (C) implementation of Keccak (SHA3) cryptographic hashing algorithm.
 
-== Features/Status/Etc.
++SHA3::Digest+ is a *Digest*[http://www.ruby-doc.org/stdlib-1.9.3/libdoc/digest/rdoc/Digest.html] compliant _subclass_ with complete interface support.
 
-4th Oct. 2012: This is very alpha quality code, and not suitable for production.
++SHA3::Digest.compute()+ method provides support for bit-length hashing.
 
-== Install
+== Releases
+
+*0.1.x* :: Alpha code, and not suitable for production.
+*0.2.0* :: Production worthy, but breaks API compatibility with 0.1.x. Backward-compatibility will be maintained henceforth.
+
+== Installation
 
   $ gem install sha3
 
-== Examples
+== Usage
 
   require 'sha3'
 
-  # Basic usage
-  SHA3::digest_224("Crazy Man's Utopia")
-  => "\xF8\x1A4\xACW6\v\x01A \x99\x11i\x91\xB3q\xB5\xF5\x04\xD4\x88fn\xC6\xA7\xEA\xBBb"
+Valid hash bit-lengths are: *224*, *256*, *384*, *512*. You may also use corresponding symbols when instantiating a new instance or calling the +compute()+ method: 
+  
+  :sha224
+  :sha256 
+  :sha384
+  :sha512
 
-  # A bit more advanced
-  SHA3::digest("Crazy Man's Utopia", 36, 512).unpack("H*")
-  => ["bc9d6cea2083c219c80d2f3...884059103313040bcf73562"]
+=== Basics
+  
+  # Instantiate a new SHA3::Digest class with 256 bit length
+  s = SHA3::Digest.new(:sha256)
+  # => #<SHA3::Digest: c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470>
 
-== Requirements
+  # Update hash state, and compute new value
+  s.update "Compute Me"
+  # => #<SHA3::Digest: c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470>
+  
+  # << is an .update() alias
+  s << "Me too"
+  # => #<SHA3::Digest: e26f539eee3a05c52eb1f9439652d23343adea9764f011da232d24cd6d19924a>
+  
+  # Print digest bytes string
+  puts s.digest
+  
+  # Print digest hex string
+  puts s.hexdigest
 
-Native build environment (GCC 4.x).
+=== Hashing a file
 
-Tested with Rubies (see build status up-top):
+  # Compute the hash value for given file, and return the result as hex
+  s = SHA3::Digest.new(224).file("my_fantastical_file.bin").hexdigest
 
-  - 1.9.3
-  - 1.9.2
-  - 1.8.7
+=== Bit-length hashing
+  
+  # Compute hash of "011"
+  SHA3::Digest.compute(:sha224, "\xC0", 3).unpack("H*")
+  # => ["2b695a6fd92a2b3f3ce9cfca617d22c9bb52815dd59a9719b01bad25"]
+
+== Development
+
+* Native build tools (e.g., GCC, Minigw, etc.)
+* Gems: rubygems-tasks, rake, rspec, yard
+
+== RSpec
+
+Call +rake+ to run the included RSpec tests.
+
+Please note that only a small subset of test vectors are included in this source repository; however, the complete test vectors suite is available for download. Simply run the +test.sh+ shell script (available in the root of source directory) to generate full bit-length RSpec test files.
+
+  sh test.sh
+
+== Rubies
+
+Tested with Rubies:
+
+  - MRI 1.9.3
+  - MRI 1.9.2
+  - MRI 1.8.7
+  - MRI Ruby-Head
   - Rubinius (18mode)
   - Rubinius (19mode)
+  - ree
+
+On:
+
+  - Ubuntu 12.04, 12.10
+  - Windows 7, 8
+  - Mac OS X 10.8
+
+== TO DO:
+
+* Documentation (resolve order issue with Yard)!
+* Add support for arbitrary length hashes.
+* Add hex output support to compute method.
 
 == Copyright
 
