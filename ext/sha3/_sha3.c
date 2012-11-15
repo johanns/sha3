@@ -110,13 +110,16 @@ static VALUE c_digest_alloc(VALUE klass)
   if (!mdx)
     rb_raise(eDigestError, "failed to allocate object memory");
 
-  mdx->state = (hashState *) malloc(sizeof(*mdx->state));
-  memset(mdx->state, 0, sizeof(*mdx->state));
-  
-  if (!mdx->state)
+  mdx->state = (hashState *) malloc(sizeof(*mdx->state));  
+  if (!mdx->state) {
+    free_allox(mdx);
     rb_raise(eDigestError, "failed to allocate state memory");
+  }
 
   obj = Data_Wrap_Struct(klass, 0, free_allox, mdx);
+
+  memset(mdx->state, 0, sizeof(*mdx->state));
+  mdx->hashbitlen = 0;
 
   return obj;
 }
