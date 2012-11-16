@@ -6,18 +6,14 @@
 coverage
 InstalledFiles
 lib/bundler/man
-pkg/
-rdoc/
+pkg
+rdoc
 spec/reports
 test/tmp
 test/version_tmp
-tmp/
+tmp
 
 # YARD artifacts
 .yardoc
 _yardoc
 doc/
-
-*.lock
-*.so
-Makefile
