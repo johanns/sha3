@@ -9,15 +9,15 @@ Documentation :: http://rubydoc.info/gems/sha3/frames
 
 <em>SHA3 for Ruby</em> is a native (C) implementation of Keccak (SHA3) cryptographic hashing algorithm.
 
-+SHA3::Digest+: A standard *Digest* _subclass_. The interface, and operation of this class are parallel to digest classes (e.g.: Digest::SHA2, and OpenSSL::Digest) bundled with MRI-based Rubies. See *Digest* documentation for additional details (http://www.ruby-doc.org/stdlib-1.9.3/libdoc/digest/rdoc/Digest.html).
+<em>SHA3::Digest</em>: A standard *Digest* _subclass_. The interface, and operation of this class are parallel to digest classes (e.g.: <em>Digest::SHA2</em>, and <em>OpenSSL::Digest</em>) bundled with MRI-based Rubies. See *Digest* documentation for additional details (http://www.ruby-doc.org/stdlib-1.9.3/libdoc/digest/rdoc/Digest.html).
 
-+SHA3::Digest.compute()+: A class-method with data bit-length hashing support.
+<em>SHA3::Digest.compute()</em>: A class-method with data bit-length hashing support.
 
 == Releases
 
 *0.1.x* :: Alpha code, and not suitable for production.
 *0.2.0* :: Production worthy, but breaks API compatibility with 0.1.x. Backward-compatibility will be maintained henceforth.
-*0.2.1* :: Added sub-class for each SHA3 supported bit-lengths (example: SHA3::Digest::SHA256). Minor bug fix.
+*0.2.2* :: Added sub-class for each SHA3 supported bit-lengths (example: SHA3::Digest::SHA256). Minor bug fix.
 
 == Installation
 
@@ -48,7 +48,7 @@ Alternatively, you can instantiate using one of four sub-classes:
   # Instantiate a new SHA3::Digest class with 256 bit length
   s = SHA3::Digest.new(:sha256)
   
-  # OR #
+  ### OR ###
   
   s = SHA3::Digest::SHA256.new()
   
@@ -66,7 +66,7 @@ Alternatively, you can instantiate using one of four sub-classes:
   s.hexdigest
   # => "bedf0dd9a15b6474208b624c4e8a1e672ce0f06498e3abd7cc37f0ae69759259"
 
-  # Digest class methods:
+  ### Digest class-methods: ###
   
   SHA3::Digest.hexdigest("Hash me, please", :sha224)
   # => "200e7bc18cd6132689eb8fa3f7c3a978d73215384a626c23e4508f33"
@@ -81,13 +81,13 @@ Alternatively, you can instantiate using one of four sub-classes:
 
   # Calling SHA3::Digest.file(...) defaults to SHA256
   s = SHA3::Digest.file("tests.sh")
-    # => #<SHA3::Digest: a9801db49389339bd8a62817f229f0f9394ca73b34fd7dbc7ec5ed7a99bc49f1>
+  # => #<SHA3::Digest: a9801db49389339bd8a62817f229f0f9394ca73b34fd7dbc7ec5ed7a99bc49f1>
 
 === Bit-length hashing
   
   # Compute hash of "011"
   SHA3::Digest.compute(:sha224, "\xC0", 3).unpack("H*")
-    # => ["2b695a6fd92a2b3f3ce9cfca617d22c9bb52815dd59a9719b01bad25"]
+  # => ["2b695a6fd92a2b3f3ce9cfca617d22c9bb52815dd59a9719b01bad25"]
 
 == Development
 
@@ -98,7 +98,7 @@ Alternatively, you can instantiate using one of four sub-classes:
 
 Call +rake+ to run the included RSpec tests.
 
-Only a small subset of test vectors are included in the source repository; however, the complete test vectors suite is available for download. Simply run the +test.sh+ shell script (available in the root of source directory) to generate full bit-length RSpec test files.
+Only a small subset of test vectors are included in the source repository; however, the complete test vectors suite is available for download. Simply run the +tests.sh+ shell script (available in the root of source directory) to generate full bit-length RSpec test files.
 
   sh tests.sh
 
