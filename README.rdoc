@@ -9,14 +9,15 @@ Documentation :: http://rubydoc.info/gems/sha3/frames
 
 <em>SHA3 for Ruby</em> is a native (C) implementation of Keccak (SHA3) cryptographic hashing algorithm.
 
-+SHA3::Digest+ is a *Digest*[http://www.ruby-doc.org/stdlib-1.9.3/libdoc/digest/rdoc/Digest.html] compliant _subclass_ with complete interface support.
++SHA3::Digest+: A standard *Digest* _subclass_. The interface, and operation of this class are parallel to digest classes (e.g.: Digest::SHA2, and OpenSSL::Digest) bundled with MRI-based Rubies. See *Digest* documentation for additional details (http://www.ruby-doc.org/stdlib-1.9.3/libdoc/digest/rdoc/Digest.html).
 
-+SHA3::Digest.compute()+ method provides support for bit-length hashing.
++SHA3::Digest.compute()+: A class-method with data bit-length hashing support.
 
 == Releases
 
 *0.1.x* :: Alpha code, and not suitable for production.
 *0.2.0* :: Production worthy, but breaks API compatibility with 0.1.x. Backward-compatibility will be maintained henceforth.
+*0.2.1* :: Added sub-class for each SHA3 supported bit-lengths (example: SHA3::Digest::SHA256). Minor bug fix.
 
 == Installation
 
@@ -33,43 +34,67 @@ Valid hash bit-lengths are: *224*, *256*, *384*, *512*. You may also use corresp
   :sha384
   :sha512
 
+  # Example: SHA3::Digest.new(224) = SHA3::Digest.new(:sha224)
+
+Alternatively, you can instantiate using one of four sub-classes:
+
+  SHA3::Digest::SHA224.new() # 224 bits
+  SHA3::Digest::SHA256.new() # 256 bits
+  SHA3::Digest::SHA384.new() # 384 bits
+  SHA3::Digest::SHA512.new() # 512 bits
+
 === Basics
   
   # Instantiate a new SHA3::Digest class with 256 bit length
   s = SHA3::Digest.new(:sha256)
-  # => #<SHA3::Digest: c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470>
-
+  
+  # OR #
+  
+  s = SHA3::Digest::SHA256.new()
+  
   # Update hash state, and compute new value
   s.update "Compute Me"
-  # => #<SHA3::Digest: c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470>
   
   # << is an .update() alias
   s << "Me too"
-  # => #<SHA3::Digest: e26f539eee3a05c52eb1f9439652d23343adea9764f011da232d24cd6d19924a>
   
-  # Print digest bytes string
-  puts s.digest
+  # Returns digest value in bytes
+  s.digest
+  # => "\xBE\xDF\r\xD9\xA1[dt \x8BbLN\x8A\x1Eg,\xE0\xF0d\x98\xE3\xAB\xD7\xCC7\xF0\xAEiu\x92Y"
+   
+  # Returns digest value as hex string
+  s.hexdigest
+  # => "bedf0dd9a15b6474208b624c4e8a1e672ce0f06498e3abd7cc37f0ae69759259"
+
+  # Digest class methods:
   
-  # Print digest hex string
-  puts s.hexdigest
+  SHA3::Digest.hexdigest("Hash me, please", :sha224)
+  # => "200e7bc18cd6132689eb8fa3f7c3a978d73215384a626c23e4508f33"
+
+  SHA3::Digest::SHA384.digest("Hash me, please")
+  # => "\xF5\xCEpC\xB0eV\xA3\x92P\xF8\x93\xB8\x145\x19\x1A)\xB1\x88\xBF\a\a7\x88\f\xFETI\e\x17\x80\xEC\xA6}\xABR\xAE\xAFK\xFF|d\x81\xF7\xB5\x9Ah"
 
 === Hashing a file
 
   # Compute the hash value for given file, and return the result as hex
-  s = SHA3::Digest.new(224).file("my_fantastical_file.bin").hexdigest
+  s = SHA3::Digest::SHA224.file("my_fantastical_file.bin").hexdigest
+
+  # Calling SHA3::Digest.file(...) defaults to SHA256
+  s = SHA3::Digest.file("tests.sh")
+    # => #<SHA3::Digest: a9801db49389339bd8a62817f229f0f9394ca73b34fd7dbc7ec5ed7a99bc49f1>
 
 === Bit-length hashing
   
   # Compute hash of "011"
   SHA3::Digest.compute(:sha224, "\xC0", 3).unpack("H*")
-  # => ["2b695a6fd92a2b3f3ce9cfca617d22c9bb52815dd59a9719b01bad25"]
+    # => ["2b695a6fd92a2b3f3ce9cfca617d22c9bb52815dd59a9719b01bad25"]
 
 == Development
 
 * Native build tools (e.g., GCC, Minigw, etc.)
 * Gems: rubygems-tasks, rake, rspec, yard
 
-== RSpec
+== Testing + RSpec
 
 Call +rake+ to run the included RSpec tests.
 
