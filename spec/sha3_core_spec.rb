@@ -70,6 +70,51 @@ describe SHA3::Digest do
     sha.digest_length.should(eq(64))
     sha.block_length.should(eq(72))    
   end
+  
+  it "should pass Digest.SHA224() usage test" do
+    sha = SHA3::Digest::SHA224.new()
+    sha.hexdigest.should eq("f71837502ba8e10837bdd8d365adb85591895602fc552b48b7390abd")
+    sha.update(["cc"].pack("H*")).hexdigest.should eq("a9cab59eb40a10b246290f2d6086e32e3689faf1d26b470c899f2802")
+    sha.reset.hexdigest.should eq("f71837502ba8e10837bdd8d365adb85591895602fc552b48b7390abd")
+    sha << (["5fce8109a358570e40983e1184e541833bb9091e280f258cfb144387b05d190e431cb19baa67273ba0c58abe91308e1844dcd0b3678baa42f335f2fa05267a0240b3c718a5942b3b3e3bfa98a55c25a1466e8d7a603722cb2bbf03afa54cd769a99f310735ee5a05dae2c22d397bd95635f58c48a67f90e1b73aafcd3f82117f0166657838691005b18da6f341d6e90fc1cdb352b30fae45d348294e501b63252de14740f2b85ae5299ddec3172de8b6d0ba219a20a23bb5e10ff434d39db3f583305e9f5c039d98569e377b75a70ab837d1df269b8a4b566f40bb91b577455fd3c356c914fa06b9a7ce24c7317a172d"].pack("H*"))
+    sha.hexdigest.should(eq("db85af5cfce746240e6d44e73cef66a72ce5968284d35ffef7fbff6c"))
+    sha.digest_length.should(eq(28))
+    sha.block_length.should(eq(144))
+  end
+
+  it "should pass Digest.SHA256() usage test" do
+    sha = SHA3::Digest::SHA256.new()
+    sha.hexdigest.should eq("c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470")
+    sha.update(["cc"].pack("H*")).hexdigest.should eq("eead6dbfc7340a56caedc044696a168870549a6a7f6f56961e84a54bd9970b8a")
+    sha.reset.hexdigest.should eq("c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470")
+    sha << (["6172f1971a6e1e4e6170afbad95d5fec99bf69b24b674bc17dd78011615e502de6f56b86b1a71d3f4348087218ac7b7d09302993be272e4a591968aef18a1262d665610d1070ee91cc8da36e1f841a69a7a682c580e836941d21d909a3afc1f0b963e1ca5ab193e124a1a53df1c587470e5881fb54dae1b0d840f0c8f9d1b04c645ba1041c7d8dbf22030a623aa15638b3d99a2c400ff76f3252079af88d2b37f35ee66c1ad7801a28d3d388ac450b97d5f0f79e4541755356b3b1a5696b023f39ab7ab5f28df4202936bc97393b93bc915cb159ea1bd7a0a414cb4b7a1ac3af68f50d79f0c9c7314e750f7d02faa58bfa"].pack("H*"))
+    sha.hexdigest.should(eq("4ea524e705020284b18284e34683725590e1ee565a6ff598ed4d42b1c987471e")) 
+    sha.digest_length.should(eq(32))
+    sha.block_length.should(eq(136))
+  end
+  
+  it "should pass Digest.SHA384() usage test" do
+    sha = SHA3::Digest::SHA384.new()
+    sha.hexdigest.should eq("2c23146a63a29acf99e73b88f8c24eaa7dc60aa771780ccc006afbfa8fe2479b2dd2b21362337441ac12b515911957ff")
+    sha.update(["cc"].pack("H*")).hexdigest.should eq("1b84e62a46e5a201861754af5dc95c4a1a69caf4a796ae405680161e29572641f5fa1e8641d7958336ee7b11c58f73e9")
+    sha.reset.hexdigest.should eq("2c23146a63a29acf99e73b88f8c24eaa7dc60aa771780ccc006afbfa8fe2479b2dd2b21362337441ac12b515911957ff")
+    sha << (["3b8e97c5ffc2d6a40fa7de7fcefc90f3b12c940e7ab415321e29ee692dfac799b009c99dcddb708fce5a178c5c35ee2b8617143edc4c40b4d313661f49abdd93cea79d117518805496fe6acf292c4c2a1f76b403a97d7c399daf85b46ad84e16246c67d6836757bde336c290d5d401e6c1386ab32797af6bb251e9b2d8fe754c47482b72e0b394eab76916126fd68ea7d65eb93d59f5b4c5ac40f7c3b37e7f3694f29424c24af8c8f0ef59cd9dbf1d28e0e10f799a6f78cad1d45b9db3d7dee4a7059abe99182714983b9c9d44d7f5643596d4f3"].pack("H*"))
+    sha.hexdigest.should(eq("9172aad6c15b4dcd79bbd84fad0601119d8b4e3afed17b594ff38424157985ee27b65826b9905486e767e85aa031e07b"))
+    sha.digest_length.should(eq(48))
+    sha.block_length.should(eq(104))
+  end
+
+  it "should pass Digest.SHA512() usage test" do
+    sha = SHA3::Digest::SHA512.new()
+    sha.hexdigest.should eq("0eab42de4c3ceb9235fc91acffe746b29c29a8c366b7c60e4e67c466f36a4304c00fa9caf9d87976ba469bcbe06713b435f091ef2769fb160cdab33d3670680e")
+    sha.update(["cc"].pack("H*")).hexdigest.should eq("8630c13cbd066ea74bbe7fe468fec1dee10edc1254fb4c1b7c5fd69b646e44160b8ce01d05a0908ca790dfb080f4b513bc3b6225ece7a810371441a5ac666eb9")
+    sha.reset.hexdigest.should eq("0eab42de4c3ceb9235fc91acffe746b29c29a8c366b7c60e4e67c466f36a4304c00fa9caf9d87976ba469bcbe06713b435f091ef2769fb160cdab33d3670680e")
+    sha << (["03d625488354df30e3f875a68edfcf340e8366a8e1ab67f9d5c5486a96829dfac0578289082b2a62117e1cf418b43b90e0adc881fc6ae8105c888e9ecd21aea1c9ae1a4038dfd17378fed71d02ae492087d7cdcd98f746855227967cb1ab4714261ee3bead3f4db118329d3ebef4bc48a875c19ba763966da0ebea800e01b2f50b00e9dd4caca6dcb314d00184ef71ea2391d760c950710db4a70f9212ffc54861f9dc752ce18867b8ad0c48df8466ef7231e7ac567f0eb55099e622ebb86cb237520190a61c66ad34f1f4e289cb3282ae3eaac6152ed24d2c92bae5a7658252a53c49b7b02dfe54fdb2e90074b6cf310ac661"].pack("H*"))
+    sha.hexdigest.should(eq("13a592b73ede487036c8816bd6fc6cdc04dc6133409a6ee990584160518f9ef573264cf04d38a3ba75d150f4f026f6df8936e13c8f4f3ecc9ecbc43fdfc488a4"))
+    sha.digest_length.should(eq(64))
+    sha.block_length.should(eq(72))    
+  end
+
 end
 
 describe "SHA3::Digest.compute" do
