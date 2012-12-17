@@ -27,7 +27,7 @@ Documentation :: http://rubydoc.info/gems/sha3/frames
 
   require 'sha3'
 
-Valid hash bit-lengths are: *224*, *256*, *384*, *512*. You may also use corresponding symbols when instantiating a new instance or calling the +compute()+ method: 
+Valid hash bit-lengths are: *224*, *256*, *384*, *512*. You may also use corresponding symbols when instantiating a new instance or calling the <em>compute()</em> method: 
   
   :sha224
   :sha256 
