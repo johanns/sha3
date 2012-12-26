@@ -1,23 +1,16 @@
-= sha3 
+= sha3  {<img src="https://secure.travis-ci.org/johanns/sha3.png" alt="Build Status" />}[http://travis-ci.org/johanns/sha3]
 
-{<img src="https://secure.travis-ci.org/johanns/sha3.png" alt="Build Status" />}[http://travis-ci.org/johanns/sha3]
+<em>SHA3 for Ruby</em> is a native (C) implementation of Keccak (SHA3) cryptographic hashing algorithm.
+
 Home :: https://github.com/johanns/sha3#readme
 Issues :: https://github.com/johanns/sha3/issues
 Documentation :: http://rubydoc.info/gems/sha3/frames
 
-== Description
+== Module details
 
-<em>SHA3 for Ruby</em> is a native (C) implementation of Keccak (SHA3) cryptographic hashing algorithm.
-
-<em>SHA3::Digest</em>: A standard *Digest* _subclass_. The interface, and operation of this class are parallel to digest classes (e.g.: <em>Digest::SHA2</em>, and <em>OpenSSL::Digest</em>) bundled with MRI-based Rubies. See *Digest* documentation for additional details (http://www.ruby-doc.org/stdlib-1.9.3/libdoc/digest/rdoc/Digest.html).
+<em>SHA3::Digest</em>: A standard *Digest* _subclass_. The interface, and operation of this class are parallel to digest classes bundled with MRI-based Rubies (e.g.: <em>Digest::SHA2</em>, and <em>OpenSSL::Digest</em>). See *Digest* documentation for additional details (http://www.ruby-doc.org/stdlib-1.9.3/libdoc/digest/rdoc/Digest.html).
 
 <em>SHA3::Digest.compute()</em>: A class-method with data bit-length hashing support.
-
-== Releases
-
-*0.1.x* :: Alpha code, and not suitable for production.
-*0.2.0* :: Production worthy, but breaks API compatibility with 0.1.x. Backward-compatibility will be maintained henceforth.
-*0.2.2* :: Added sub-class for each SHA3 supported bit-lengths (example: SHA3::Digest::SHA256). Minor bug fix.
 
 == Installation
 
@@ -27,15 +20,12 @@ Documentation :: http://rubydoc.info/gems/sha3/frames
 
   require 'sha3'
 
-Valid hash bit-lengths are: *224*, *256*, *384*, *512*. You may also use corresponding symbols when instantiating a new instance or calling the <em>compute()</em> method: 
+Valid hash bit-lengths are: *224*, *256*, *384*, *512*. You may also use corresponding symbols when instantiating a new instance or calling the <em>SHA3::Digest.compute()</em> method: 
   
-  :sha224
-  :sha256 
-  :sha384
-  :sha512
+  :sha224  :sha256  :sha384  :sha512
 
-  # Example: SHA3::Digest.new(224) = SHA3::Digest.new(:sha224)
-
+  # SHA3::Digest.new(224) is SHA3::Digest.new(:sha224)
+  
 Alternatively, you can instantiate using one of four sub-classes:
 
   SHA3::Digest::SHA224.new() # 224 bits
@@ -48,7 +38,7 @@ Alternatively, you can instantiate using one of four sub-classes:
   # Instantiate a new SHA3::Digest class with 256 bit length
   s = SHA3::Digest.new(:sha256)
   
-  ### OR ###
+  # OR #
   
   s = SHA3::Digest::SHA256.new()
   
@@ -120,6 +110,12 @@ On:
   - Windows 7, 8
   - Mac OS X 10.8
 
+== Releases
+
+*0.1.x* :: Alpha code, and not suitable for production.
+*0.2.0* :: Production worthy, but breaks API compatibility with 0.1.x. Backward-compatibility will be maintained henceforth.
+*0.2.2* :: Added sub-class for each SHA3 supported bit-lengths (example: SHA3::Digest::SHA256). Minor bug fix.
+
 == TO DO:
 
 * Documentation (resolve order issue with Yard)!
@@ -128,6 +124,6 @@ On:
 
 == Copyright
 
-Copyright (c) 2012 Johanns Gregorian
+Copyright (c) 2012 Johanns Gregorian (https://github.com/johanns)
 
 See LICENSE.txt for details.
