@@ -1,1 +1,1 @@
-lib/**/*.rb ext/**/_sha3.c --markup rdoc --title "sha3 Documentation" --protected
+lib/**/doc.rb lib/**/version.rb --markup rdoc --title "sha3 Documentation" --protected

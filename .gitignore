@@ -1,7 +1,9 @@
 *.gem
 *.rbc
 *.rbx
-.bundle
+*.bundle
+*.so
+*.dll
 .config
 coverage
 InstalledFiles

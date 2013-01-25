@@ -70,7 +70,9 @@ describe SHA3::Digest do
     sha.digest_length.should(eq(64))
     sha.block_length.should(eq(72))    
   end
-  
+end
+
+describe "SHA3::Digest::SHAxyz" do 
   it "should pass Digest.SHA224() usage test" do
     sha = SHA3::Digest::SHA224.new()
     sha.hexdigest.should eq("f71837502ba8e10837bdd8d365adb85591895602fc552b48b7390abd")

@@ -19,7 +19,7 @@ module SHA3
             raise ArgumentError,
               "wrong number of arguments (#{data.length} for 1)"
           end
-          
+
           super(key, data.first)
         }
       }
