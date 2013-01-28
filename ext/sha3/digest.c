@@ -1,4 +1,7 @@
-#include "_sha3.h"
+#include "sha3.h"
+
+VALUE cDigest;
+VALUE eDigestError;
 
 /*
  * == Notes

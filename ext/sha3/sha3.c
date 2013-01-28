@@ -1,7 +1,7 @@
-#include "_sha3.h"
+#include "sha3.h"
 
 VALUE mSHA3;
-VALUE mSHA3Error;
+VALUE eSHA3Error;
 
 int get_hlen(VALUE obj)
 {
@@ -21,7 +21,7 @@ int get_hlen(VALUE obj)
     else if (rb_intern("sha512") == symid)
       hlen = 512;
     else
-      rb_raise(mSHA3Error, "invalid hash bit symbol (should be: :sha224, :sha256, :sha384, or :sha512");
+      rb_raise(eSHA3Error, "invalid hash bit symbol (should be: :sha224, :sha256, :sha384, or :sha512");
   }
   else if (TYPE(obj) == T_FIXNUM) {
     hlen = NUM2INT(obj);
@@ -30,7 +30,7 @@ int get_hlen(VALUE obj)
       rb_raise(rb_eArgError, "invalid hash bit length (should be: 224, 256, 384, or 512)");
   }
   else
-    rb_raise(mSHA3Error, "unknown type value");
+    rb_raise(eSHA3Error, "unknown type value");
 
   return hlen;
 }
@@ -38,7 +38,7 @@ int get_hlen(VALUE obj)
 void Init_sha3_n()
 {
   mSHA3 = rb_define_module("SHA3");
-  mSHA3Error = rb_define_class_under(mSHA3, "SHA3Error", rb_eStandardError);
+  eSHA3Error = rb_define_class_under(mSHA3, "SHA3Error", rb_eStandardError);
 
   Init_digest();
 }

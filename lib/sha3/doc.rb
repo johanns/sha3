@@ -2,9 +2,18 @@ require 'digest'
 
 module SHA3
   # A sub-class of (MRI Ruby based) Digest::Class, it implements SHA3 (Keccak) digest algorithm.
+  #  
+  # @note SHA3::Digest class provides a four sub-classes for the available hash bit lengths (types).
+  #   You can instantiate a new instance of Digest sub-class for a given type using the following sub-classes:
   #   
+  #     SHA3::Digest::SHA224([data])
+  #     SHA3::Digest::SHA256([data])
+  #     SHA3::Digest::SHA384([data])
+  #     SHA3::Digest::SHA512([data])
+  #
+  #   The [data] parameter is optional.
   class Digest < Digest::Class
-    # Creates a Digest instance based on given hash bit length.
+    # Creates a Digest instance based on given hash bit length (type).
     # 
     # @param type [Number, Symbol] optional parameter used to set hash bit length (type). 
     #   Valid options are: 
@@ -14,17 +23,7 @@ module SHA3
     #   
     #   Default value: 256 (bits)
     # @param data [String] optional parameter used to update initial instance state.
-    # 
-    # @note SHA3::Digest class provides a sub-class for the all four available hash bit lengths (types).
-    #   You can instantiate a new instance of Digest sub-class for a given type using the following sub-classes:
-    #   
-    #     SHA3::Digest::SHA224([data])
-    #     SHA3::Digest::SHA256([data])
-    #     SHA3::Digest::SHA384([data])
-    #     SHA3::Digest::SHA512([data])
-    #
-    #   The [data] parameter is optional.
-    # 
+    #     # 
     # @return [Digest] self
     # 
     # @example

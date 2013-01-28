@@ -1,7 +1,5 @@
-#ifndef __DIGEST_H_
-#define __DIGEST_H_
-
-#include "_sha3.h"
+#ifndef _DIGEST_H_
+#define _DIGEST_H_
 
 // From ruby/ext/openssl/ossl_digest.c
 #define GETMDX(obj, mdx) do {                                    \
@@ -19,8 +17,8 @@
   GETMDX(obj, mdx);                                              \
 } while(0)
 
-static VALUE cDigest;
-static VALUE eDigestError;
+extern VALUE cDigest;
+extern VALUE eDigestError;
 
 typedef struct {
   hashState *state;
