@@ -25,6 +25,6 @@ typedef struct {
   int hashbitlen;
 } MDX;
 
-void Init_digest(void);
+void Init_sha3_n_digest(void);
 
 #endif

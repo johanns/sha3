@@ -207,7 +207,7 @@ static VALUE c_digest_compute(int argc, VALUE *argv, VALUE self)
   return str;
 }
 
-void Init_digest()
+void Init_sha3_n_digest()
 {
   rb_require("digest");
 

@@ -40,5 +40,5 @@ void Init_sha3_n()
   mSHA3 = rb_define_module("SHA3");
   eSHA3Error = rb_define_class_under(mSHA3, "SHA3Error", rb_eStandardError);
 
-  Init_digest();
+  Init_sha3_n_digest();
 }
