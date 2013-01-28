@@ -9,3 +9,11 @@
 === 0.2.0 / 2012-11-1
 
 * SHA3::Digest: A proper ::Digest subclass.
+
+=== 0.2.2 / 2012-12-14
+
+* Added sub-class for each SHA3 supported bit-lengths (example: SHA3::Digest::SHA256). Minor bug fix.
+
+=== 0.2.3 / 2013-1-28
+
+* Added documentation file (decoupled form C source); refactored C source.

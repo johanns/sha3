@@ -115,6 +115,7 @@ On:
 *0.1.x* :: Alpha code, and not suitable for production.
 *0.2.0* :: Production worthy, but breaks API compatibility with 0.1.x. Backward-compatibility will be maintained henceforth.
 *0.2.2* :: Added sub-class for each SHA3 supported bit-lengths (example: SHA3::Digest::SHA256). Minor bug fix.
+*0.2.3* :: Added documentation file (decoupled form C source); refactored C source.
 
 == TO DO:
 
