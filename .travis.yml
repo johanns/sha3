@@ -6,8 +6,7 @@ rvm:
   - ruby-head
   - rbx-18mode
   - rbx-19mode
-  - ree
-  
+
 gemfile: Gemfile.ci
 
 branches:
