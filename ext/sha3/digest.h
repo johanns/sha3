@@ -1,6 +1,10 @@
 #ifndef _DIGEST_H_
 #define _DIGEST_H_
 
+#ifdef  __cplusplus
+extern "C" {
+#endif
+
 // From ruby/ext/openssl/ossl_digest.c
 #define GETMDX(obj, mdx) do {                                    \
   Data_Get_Struct((obj), MDX, (mdx));                            \
@@ -26,5 +30,9 @@ typedef struct {
 } MDX;
 
 void Init_sha3_n_digest(void);
+
+#ifdef  __cplusplus
+}
+#endif
 
 #endif
