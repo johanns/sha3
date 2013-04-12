@@ -1,6 +1,6 @@
 = sha3  {<img src="https://secure.travis-ci.org/johanns/sha3.png" alt="Build Status" />}[http://travis-ci.org/johanns/sha3] {<img src="https://gemnasium.com/johanns/sha3.png" alt="Dependency Status" />}[https://gemnasium.com/johanns/sha3]
 
-<em>SHA3 for Ruby</em> is a native (C) implementation of Keccak (SHA3) cryptographic hashing algorithm. Platform optimized reference is used, wherever possible.
+<em>SHA3 for Ruby</em> is a native (C) implementation of Keccak (SHA3) cryptographic hashing algorithm.
 
 Home :: https://github.com/johanns/sha3#readme
 Issues :: https://github.com/johanns/sha3/issues
