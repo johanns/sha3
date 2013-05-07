@@ -1,3 +1,5 @@
+/* Copyright (c) 2012 - 2013 Johanns Gregorian <io+sha3@jsani.com> */
+
 #ifndef _DIGEST_H_
 #define _DIGEST_H_
 
