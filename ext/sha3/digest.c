@@ -111,8 +111,23 @@ static VALUE c_digest_reset(VALUE self)
   return self;
 }
 
+// Fix: And, permanent reminder of a rookie mistake in c_digest_copy, comparing structs with == op
+static int cmp_hash_states(hashState *state1, hashState *state2)
+{
+    return (
+      (state1->state[KeccakPermutationSizeInBytes] == state2->state[KeccakPermutationSizeInBytes]) &&
+      (state1->dataQueue[KeccakMaximumRateInBytes] == state2->dataQueue[KeccakMaximumRateInBytes]) &&
+      (state1->rate == state2->rate) &&
+      (state1->capacity == state2->capacity) &&
+      (state1->bitsInQueue == state2->bitsInQueue) &&
+      (state1->fixedOutputLength == state2->fixedOutputLength) &&
+      (state1->squeezing == state2->squeezing) &&
+      (state1->bitsAvailableForSqueezing && state2->bitsAvailableForSqueezing)
+    );
+}
+
 // SHA3::Digest.copy(obj) -> self
-static VALUE c_digest_copy(VALUE self, VALUE obj) 
+static VALUE c_digest_copy(VALUE self, VALUE obj)
 {
   MDX *mdx1, *mdx2;
 
@@ -125,18 +140,18 @@ static VALUE c_digest_copy(VALUE self, VALUE obj)
 
   memcpy(mdx1->state, mdx2->state, sizeof(hashState));
   mdx1->hashbitlen = mdx2->hashbitlen;
- 
+
   // Fetch the data again to make sure it was copied
   GETMDX(self, mdx1);
   SAFEGETMDX(obj, mdx2);
-  if ((mdx1->state != mdx2->state) && (mdx1->hashbitlen != mdx2->hashbitlen))
+  if (!(cmp_hash_states(mdx1->state, mdx2->state)) && (mdx1->hashbitlen != mdx2->hashbitlen))
     rb_raise(eDigestError, "failed to copy state");
 
   return self;
 }
 
 // SHA3::Digest.digest_length -> Integer
-static VALUE c_digest_length(VALUE self) 
+static VALUE c_digest_length(VALUE self)
 {
   MDX *mdx;
   GETMDX(self, mdx);
