@@ -14,18 +14,18 @@ Documentation :: http://rubydoc.info/gems/sha3/frames
 
 == Installation
 
-  $ gem install sha3
+  gem install sha3
 
 == Usage
 
   require 'sha3'
 
-Valid hash bit-lengths are: *224*, *256*, *384*, *512*. You may also use corresponding symbols when instantiating a new instance or calling the <em>SHA3::Digest.compute()</em> method: 
-  
+Valid hash bit-lengths are: *224*, *256*, *384*, *512*. You may also use corresponding symbols when instantiating a new instance or calling the <em>SHA3::Digest.compute()</em> method:
+
   :sha224  :sha256  :sha384  :sha512
 
   # SHA3::Digest.new(224) is SHA3::Digest.new(:sha224)
-  
+
 Alternatively, you can instantiate using one of four sub-classes:
 
   SHA3::Digest::SHA224.new() # 224 bits
@@ -34,35 +34,35 @@ Alternatively, you can instantiate using one of four sub-classes:
   SHA3::Digest::SHA512.new() # 512 bits
 
 === Basics
-  
+
   # Instantiate a new SHA3::Digest class with 256 bit length
   s = SHA3::Digest.new(:sha256)
-  
+
   # OR #
-  
+
   s = SHA3::Digest::SHA256.new()
-  
+
   # Update hash state, and compute new value
   s.update "Compute Me"
-  
+
   # << is an .update() alias
   s << "Me too"
-  
+
   # Returns digest value in bytes
   s.digest
-  # => "\xBE\xDF\r\xD9\xA1[dt \x8BbLN\x8A\x1Eg,\xE0\xF0d\x98\xE3\xAB\xD7\xCC7\xF0\xAEiu\x92Y"
-   
+  # => "\xBE\xDF\r\xD9\xA1..."
+
   # Returns digest value as hex string
   s.hexdigest
-  # => "bedf0dd9a15b6474208b624c4e8a1e672ce0f06498e3abd7cc37f0ae69759259"
+  # => "bedf0dd9a15b647..."
 
   ### Digest class-methods: ###
-  
+
   SHA3::Digest.hexdigest("Hash me, please", :sha224)
-  # => "200e7bc18cd6132689eb8fa3f7c3a978d73215384a626c23e4508f33"
+  # => "200e7bc18cd613..."
 
   SHA3::Digest::SHA384.digest("Hash me, please")
-  # => "\xF5\xCEpC\xB0eV\xA3\x92P\xF8\x93\xB8\x145\x19\x1A)\xB1\x88\xBF\a\a7\x88\f\xFETI\e\x17\x80\xEC\xA6}\xABR\xAE\xAFK\xFF|d\x81\xF7\xB5\x9Ah"
+  # => "\xF5\xCEpC\xB0eV..."
 
 === Hashing a file
 
@@ -71,13 +71,13 @@ Alternatively, you can instantiate using one of four sub-classes:
 
   # Calling SHA3::Digest.file(...) defaults to SHA256
   s = SHA3::Digest.file("tests.sh")
-  # => #<SHA3::Digest: a9801db49389339bd8a62817f229f0f9394ca73b34fd7dbc7ec5ed7a99bc49f1>
+  # => #<SHA3::Digest: a9801db49389339...>
 
 === Bit-length hashing
-  
+
   # Compute hash of "011"
   SHA3::Digest.compute(:sha224, "\xC0", 3).unpack("H*")
-  # => ["2b695a6fd92a2b3f3ce9cfca617d22c9bb52815dd59a9719b01bad25"]
+  # => ["2b695a6fd92a..."]
 
 == Development
 
@@ -96,6 +96,7 @@ Only a small subset of test vectors are included in the source repository; howev
 
 Tested with Rubies:
 
+  - MRI 2.0.0
   - MRI 1.9.3
   - MRI 1.9.2
   - MRI 1.8.7
@@ -106,7 +107,7 @@ Tested with Rubies:
 
 On:
 
-  - Ubuntu 12.04, 12.10
+  - Ubuntu 12.04, 12.10, 13.04
   - Windows 7, 8
   - Mac OS X 10.8
 
@@ -116,6 +117,7 @@ On:
 *0.2.0* :: Production worthy, but breaks API compatibility with 0.1.x. Backward-compatibility will be maintained henceforth.
 *0.2.2* :: Added sub-class for each SHA3 supported bit-lengths (example: SHA3::Digest::SHA256). Minor bug fix.
 *0.2.3* :: Added documentation file (decoupled form C source); refactored C source.
+*0.2.4* :: Bug fixes.
 
 == TO DO:
 
@@ -124,6 +126,6 @@ On:
 
 == Copyright
 
-Copyright (c) 2012 Johanns Gregorian (https://github.com/johanns)
+Copyright (c) 2012 - 2013 Johanns Gregorian (https://github.com/johanns)
 
 See LICENSE.txt for details.
