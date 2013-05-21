@@ -117,8 +117,8 @@ static int cmp_states(MDX *mdx1, MDX *mdx2)
 {
     return (
       (mdx1->hashbitlen == mdx2->hashbitlen) &&
-      (strcmp(mdx1->state->state, mdx2->state->state) == 0) &&
-      (strcmp(mdx1->state->dataQueue, mdx2->state->dataQueue) == 0) &&
+      (strcmp((const char *) mdx1->state->state, (const char *)mdx2->state->state) == 0) &&
+      (strcmp((const char *) mdx1->state->dataQueue, (const char *) mdx2->state->dataQueue) == 0) &&
       (mdx1->state->rate == mdx2->state->rate) &&
       (mdx1->state->capacity == mdx2->state->capacity) &&
       (mdx1->state->bitsInQueue == mdx2->state->bitsInQueue) &&

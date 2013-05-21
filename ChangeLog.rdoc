@@ -17,3 +17,11 @@
 === 0.2.3 / 2013-1-28
 
 * Added documentation file (decoupled form C source); refactored C source.
+
+=== 0.2.4 / 2013-5-20
+
+* Fixed instance copy validation code (YANKED)
+
+=== 0.2.5 / 2013-5-21
+
+* Fixed the fix to instance copy validation code.
