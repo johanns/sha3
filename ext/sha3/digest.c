@@ -111,18 +111,20 @@ static VALUE c_digest_reset(VALUE self)
   return self;
 }
 
-// Fix: And, permanent reminder of a rookie mistake in c_digest_copy, comparing structs with == op
-static int cmp_hash_states(hashState *state1, hashState *state2)
+// Fix: And, permanent reminder of a rookie mistake in c_digest_copy, comparing structs with ==/!= op
+// Fix: Woke-up after 2-hours of sleep, and for good reason. Fixed string comparison. Need to re-read K&R!
+static int cmp_states(MDX *mdx1, MDX *mdx2)
 {
     return (
-      (state1->state[KeccakPermutationSizeInBytes] == state2->state[KeccakPermutationSizeInBytes]) &&
-      (state1->dataQueue[KeccakMaximumRateInBytes] == state2->dataQueue[KeccakMaximumRateInBytes]) &&
-      (state1->rate == state2->rate) &&
-      (state1->capacity == state2->capacity) &&
-      (state1->bitsInQueue == state2->bitsInQueue) &&
-      (state1->fixedOutputLength == state2->fixedOutputLength) &&
-      (state1->squeezing == state2->squeezing) &&
-      (state1->bitsAvailableForSqueezing && state2->bitsAvailableForSqueezing)
+      (mdx1->hashbitlen == mdx2->hashbitlen) &&
+      (strcmp(mdx1->state->state, mdx2->state->state) == 0) &&
+      (strcmp(mdx1->state->dataQueue, mdx2->state->dataQueue) == 0) &&
+      (mdx1->state->rate == mdx2->state->rate) &&
+      (mdx1->state->capacity == mdx2->state->capacity) &&
+      (mdx1->state->bitsInQueue == mdx2->state->bitsInQueue) &&
+      (mdx1->state->fixedOutputLength == mdx2->state->fixedOutputLength) &&
+      (mdx1->state->squeezing == mdx2->state->squeezing) &&
+      (mdx1->state->bitsAvailableForSqueezing == mdx2->state->bitsAvailableForSqueezing)
     );
 }
 
@@ -144,7 +146,7 @@ static VALUE c_digest_copy(VALUE self, VALUE obj)
   // Fetch the data again to make sure it was copied
   GETMDX(self, mdx1);
   SAFEGETMDX(obj, mdx2);
-  if (!(cmp_hash_states(mdx1->state, mdx2->state)) && (mdx1->hashbitlen != mdx2->hashbitlen))
+  if (!cmp_states(mdx1, mdx2))
     rb_raise(eDigestError, "failed to copy state");
 
   return self;
