@@ -3,12 +3,12 @@ require 'rbconfig'
 
 FileUtils.rm "#{$srcdir}/KeccakF-1600-opt.c", :force => true
 
-build_cpu = RbConfig::CONFIG['build_cpu']
+target_cpu = RbConfig::CONFIG['target_cpu']
 
-if 1.size == 4 and build_cpu =~ /i386|x86_32/   # x86 32bit optimized code
+if 1.size == 4 and target_cpu =~ /i386|x86_32/   # x86 32bit optimized code
   Logging::message "=== Using i386 optimized Keccak code ===\n"
   FileUtils.cp "#{$srcdir}/KeccakF-1600-opt32.c-arch", "#{$srcdir}/KeccakF-1600-opt.c"
-elsif 1.size == 8 and build_cpu =~ /i686|x86_64/
+elsif 1.size == 8 and target_cpu =~ /i686|x86_64/
   Logging::message "=== Using i686 optimized Keccak code ===\n"
   FileUtils.cp "#{$srcdir}/KeccakF-1600-opt64.c-arch", "#{$srcdir}/KeccakF-1600-opt.c"
 else # Ha? Use reference code -- slow
