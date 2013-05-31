@@ -58,7 +58,7 @@ Alternatively, you can instantiate using one of four sub-classes:
 
   ### Digest class-methods: ###
 
-  SHA3::Digest.hexdigest("Hash me, please", :sha224)
+  SHA3::Digest.hexdigest(:sha224, "Hash me, please")
   # => "200e7bc18cd613..."
 
   SHA3::Digest::SHA384.digest("Hash me, please")
