@@ -96,20 +96,19 @@ Only a small subset of test vectors are included in the source repository; howev
 
 Tested with Rubies:
 
+  - MRI 2.1.0
   - MRI 2.0.0
   - MRI 1.9.3
   - MRI 1.9.2
   - MRI 1.8.7
   - MRI Ruby-Head
-  - Rubinius (18mode)
-  - Rubinius (19mode)
-  - ree
+  - Rubinius 2
 
 On:
 
   - Ubuntu 12.04, 12.10, 13.04
-  - Windows 7, 8
-  - Mac OS X 10.8
+  - Windows 7, 8, 8.1
+  - Mac OS X 10.6 - 10.9
 
 == Releases
 
@@ -127,6 +126,6 @@ On:
 
 == Copyright
 
-Copyright (c) 2012 - 2013 Johanns Gregorian (https://github.com/johanns)
+Copyright (c) 2012 - 2014 Johanns Gregorian (https://github.com/johanns)
 
 See LICENSE.txt for details.
