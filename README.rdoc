@@ -1,4 +1,4 @@
-= sha3  {<img src="https://badge.fury.io/rb/sha3.png" alt="Gem Version" />}[http://badge.fury.io/rb/sha3] {<img src="https://secure.travis-ci.org/johanns/sha3.png" alt="Build Status" />}[http://travis-ci.org/johanns/sha3] {<img src="https://gemnasium.com/johanns/sha3.png" alt="Dependency Status" />}[https://gemnasium.com/johanns/sha3]
+= sha3  {<img src="https://badge.fury.io/rb/sha3.png" alt="Gem Version" />}[http://badge.fury.io/rb/sha3] {<img src="https://secure.travis-ci.org/johanns/sha3.png" alt="Build Status" />}[http://travis-ci.org/johanns/sha3] {<img src="https://gemnasium.com/johanns/sha3.png" alt="Dependency Status" />}[https://gemnasium.com/johanns/sha3] {<img src="https://codeclimate.com/github/johanns/sha3.png" />}[https://codeclimate.com/github/johanns/sha3]
 
 <em>SHA3 for Ruby</em> is a native (C) implementation of Keccak (SHA3) cryptographic hashing algorithm.
 
