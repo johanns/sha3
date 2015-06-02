@@ -16,15 +16,15 @@ extern "C" {
 } while (0)
 
 #define SAFEGETMDX(obj, mdx) do {                                \
-  if (!rb_obj_is_kind_of(obj, cDigest)) {                        \
+  if (!rb_obj_is_kind_of(obj, cSHA3Digest)) {                        \
     rb_raise(rb_eTypeError, "wrong argument (%s)! (expected %s)",\
-             rb_obj_classname(obj), rb_class2name(cDigest));     \
+             rb_obj_classname(obj), rb_class2name(cSHA3Digest));     \
   }                                                              \
   GETMDX(obj, mdx);                                              \
 } while(0)
 
-extern VALUE cDigest;
-extern VALUE eDigestError;
+extern VALUE cSHA3Digest;
+extern VALUE eSHA3DigestError;
 
 typedef struct {
   hashState *state;

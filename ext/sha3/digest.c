@@ -2,8 +2,8 @@
 
 #include "sha3.h"
 
-VALUE cDigest;
-VALUE eDigestError;
+VALUE cSHA3Digest;
+VALUE eSHA3DigestError;
 
 /*
  * == Notes
@@ -38,12 +38,12 @@ static VALUE c_digest_alloc(VALUE klass)
 
   mdx = (MDX *) malloc(sizeof(MDX));
   if (!mdx)
-    rb_raise(eDigestError, "failed to allocate object memory");
+    rb_raise(eSHA3DigestError, "failed to allocate object memory");
 
   mdx->state = (hashState *) malloc(sizeof(hashState));  
   if (!mdx->state) {
     free_allox(mdx);
-    rb_raise(eDigestError, "failed to allocate state memory");
+    rb_raise(eSHA3DigestError, "failed to allocate state memory");
   }
 
   obj = Data_Wrap_Struct(klass, 0, free_allox, mdx);
@@ -71,7 +71,7 @@ static VALUE c_digest_init(int argc, VALUE *argv, VALUE self)
     mdx->hashbitlen = 256;
 
   if (Init(mdx->state, mdx->hashbitlen) != SUCCESS)
-    rb_raise(eDigestError, "failed to initialize algorithm state");
+    rb_raise(eSHA3DigestError, "failed to initialize algorithm state");
 
   if (!NIL_P(data))
     return c_digest_update(self, data);
@@ -91,7 +91,7 @@ static VALUE c_digest_update(VALUE self, VALUE data)
   dlen = (RSTRING_LEN(data) * 8);
 
   if (Update(mdx->state, RSTRING_PTR(data), dlen) != SUCCESS)
-    rb_raise(eDigestError, "failed to update hash data");
+    rb_raise(eSHA3DigestError, "failed to update hash data");
 
   return self;
 }
@@ -106,7 +106,7 @@ static VALUE c_digest_reset(VALUE self)
   memset(mdx->state, 0, sizeof(hashState));
 
   if (Init(mdx->state, mdx->hashbitlen) != SUCCESS)
-    rb_raise(eDigestError, "failed to reset internal state");
+    rb_raise(eSHA3DigestError, "failed to reset internal state");
 
   return self;
 }
@@ -147,7 +147,7 @@ static VALUE c_digest_copy(VALUE self, VALUE obj)
   GETMDX(self, mdx1);
   SAFEGETMDX(obj, mdx2);
   if (!cmp_states(mdx1, mdx2))
-    rb_raise(eDigestError, "failed to copy state");
+    rb_raise(eSHA3DigestError, "failed to copy state");
 
   return self;
 }
@@ -194,7 +194,7 @@ static VALUE c_digest_finish(int argc, VALUE *argv, VALUE self)
   }
 
   if (Final(mdx->state, RSTRING_PTR(str)) != SUCCESS)
-    rb_raise(eDigestError, "failed to finalize digest");
+    rb_raise(eSHA3DigestError, "failed to finalize digest");
 
   return str;
 }
@@ -221,7 +221,7 @@ static VALUE c_digest_compute(int argc, VALUE *argv, VALUE self)
   str = rb_str_new(0, hashbitlen / 8);
 
   if (Hash(hashbitlen, RSTRING_PTR(data), datalen, RSTRING_PTR(str)) != SUCCESS)
-    rb_raise(eDigestError, "failed to generate hash");
+    rb_raise(eSHA3DigestError, "failed to generate hash");
 
   return str;
 }
@@ -231,25 +231,25 @@ void Init_sha3_n_digest()
   rb_require("digest");
 
   /* SHA3::Digest (class) */
-  cDigest = rb_define_class_under(mSHA3, "Digest", rb_path2class("Digest::Class"));
+  cSHA3Digest = rb_define_class_under(mSHA3, "Digest", rb_path2class("Digest::Class"));
   /* SHA3::Digest::DigestError (class) */ 
-  eDigestError = rb_define_class_under(cDigest, "DigestError", rb_eStandardError);
+  eSHA3DigestError = rb_define_class_under(cSHA3Digest, "DigestError", rb_eStandardError);
 
   // SHA3::Digest (class) methods
-  rb_define_alloc_func(cDigest, c_digest_alloc);
-  rb_define_method(cDigest, "initialize", c_digest_init, -1);
-  rb_define_method(cDigest, "update", c_digest_update, 1);
-  rb_define_method(cDigest, "reset", c_digest_reset, 0);
-  rb_define_method(cDigest, "initialize_copy", c_digest_copy, 1);
-  rb_define_method(cDigest, "digest_length", c_digest_length, 0);
-  rb_define_method(cDigest, "block_length", c_digest_block_length, 0);
-  rb_define_method(cDigest, "name", c_digest_name, 0);
-  rb_define_private_method(cDigest, "finish", c_digest_finish, -1);
+  rb_define_alloc_func(cSHA3Digest, c_digest_alloc);
+  rb_define_method(cSHA3Digest, "initialize", c_digest_init, -1);
+  rb_define_method(cSHA3Digest, "update", c_digest_update, 1);
+  rb_define_method(cSHA3Digest, "reset", c_digest_reset, 0);
+  rb_define_method(cSHA3Digest, "initialize_copy", c_digest_copy, 1);
+  rb_define_method(cSHA3Digest, "digest_length", c_digest_length, 0);
+  rb_define_method(cSHA3Digest, "block_length", c_digest_block_length, 0);
+  rb_define_method(cSHA3Digest, "name", c_digest_name, 0);
+  rb_define_private_method(cSHA3Digest, "finish", c_digest_finish, -1);
 
-  rb_define_alias(cDigest, "<<", "update");
+  rb_define_alias(cSHA3Digest, "<<", "update");
   
   // SHA3 (module) functions (support bit operations)
-  rb_define_singleton_method(cDigest, "compute", c_digest_compute, -1);
+  rb_define_singleton_method(cSHA3Digest, "compute", c_digest_compute, -1);
 
   return;
 }
