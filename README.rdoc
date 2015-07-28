@@ -95,7 +95,8 @@ Only a small subset of test vectors are included in the source repository; howev
 == Rubies
 
 Tested with Rubies:
-
+  
+  - MRI 2.2.2
   - MRI 2.1.0
   - MRI 2.0.0
   - MRI 1.9.3
@@ -108,7 +109,7 @@ On:
 
   - Ubuntu 12.04, 12.10, 13.04
   - Windows 7, 8, 8.1
-  - Mac OS X 10.6 - 10.9
+  - Mac OS X 10.6 - 10.11
 
 == Releases
 
@@ -118,6 +119,7 @@ On:
 *0.2.3* :: Added documentation file (decoupled form C source); refactored C source.
 *0.2.4* :: Bug fixes. (YANKED)
 *0.2.5* :: Bug fixes. (See ChangeLog.rdoc)
+*0.2.6* :: Fixed bug #4
 
 == TO DO:
 
