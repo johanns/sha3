@@ -1,6 +1,6 @@
 # sha3  
 
-[![Gem Version](http://badge.fury.io/rb/sha3)](http://badge.fury.io/rb/sha3) [![CI](https://secure.travis-ci.org/johanns/sha3.png)](https://secure.travis-ci.org/johanns/sha3) [![Dependencies](https://gemnasium.com/johanns/sha3.png)](https://gemnasium.com/johanns/sha3) [![CodeClimate](https://codeclimate.com/github/johanns/sha3.png)](https://codeclimate.com/github/johanns/sha3)
+[![Gem Version](https://badge.fury.io/rb/sha3.svg)](https://badge.fury.io/rb/sha3) [![CI](https://secure.travis-ci.org/johanns/sha3.png)](https://secure.travis-ci.org/johanns/sha3) [![Dependencies](https://gemnasium.com/johanns/sha3.png)](https://gemnasium.com/johanns/sha3) [![CodeClimate](https://codeclimate.com/github/johanns/sha3.png)](https://codeclimate.com/github/johanns/sha3)
 
 **SHA3 for Ruby** is a native (C) FIPS 202 comlient implementation of SHA3 (Keccak) cryptographic hashing algorithm.
 
