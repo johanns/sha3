@@ -2,9 +2,9 @@ module SHA3
   extend self
 
   # sha3 release version
-  VERSION = "0.2.6"
+  VERSION = "1.0.1"
 
   # keccak version number
-  KECCAK_VERSION = "3.2"
+  KECCAK_VERSION = "4.0"
 end
 
