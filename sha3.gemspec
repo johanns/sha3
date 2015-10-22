@@ -6,7 +6,7 @@ Gem::Specification.new do |gem|
   gem.name          = "sha3"
   gem.version       = SHA3::VERSION
   gem.summary       = %q{SHA3 for Ruby}
-  gem.description   = %q{SHA3 for Ruby is a native (C) FIPS 202 complient implementation of SHA3 (Keccak) cryptographic hashing algorithm.}
+  gem.description   = %q{SHA3 for Ruby is a native (C) FIPS 202 compliant implementation of SHA3 (Keccak) cryptographic hashing algorithm.}
   gem.license       = "MIT"
   gem.authors       = ["Johanns Gregorian"]
   gem.email         = "io+sha3@jsg.io"

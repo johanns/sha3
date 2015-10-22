@@ -2,7 +2,7 @@
 
 [![Gem Version](https://badge.fury.io/rb/sha3.svg)](https://badge.fury.io/rb/sha3) [![CI](https://secure.travis-ci.org/johanns/sha3.png)](https://secure.travis-ci.org/johanns/sha3) [![Dependencies](https://gemnasium.com/johanns/sha3.png)](https://gemnasium.com/johanns/sha3) [![CodeClimate](https://codeclimate.com/github/johanns/sha3.png)](https://codeclimate.com/github/johanns/sha3)
 
-**SHA3 for Ruby** is a native (C) FIPS 202 comlient implementation of SHA3 (Keccak) cryptographic hashing algorithm.
+**SHA3 for Ruby** is a native (C) FIPS 202 compliant implementation of SHA3 (Keccak) cryptographic hashing algorithm.
 
 - Home :: [https://github.com/johanns/sha3#readme]()
 - Issues :: [https://github.com/johanns/sha3/issues]()
@@ -106,7 +106,7 @@ Only a small subset of test vectors are included in the source repository; howev
 ### Rubies
 
 Tested with Rubies:
-  
+
   - MRI 2.2.2
   - MRI 2.1.0
   - MRI 2.0.0
