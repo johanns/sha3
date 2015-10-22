@@ -10,9 +10,8 @@
 
 ## Warnings
 
-- Version 1.0+ breaks compatibilty with
-
-
+- Version 1.0+ breaks compatibilty with previous versions of this gem (i.e., Keccak != SHA3 FIPS 202)
+- Do NOT hash passwords; use ```bcrypt``` or ```scrypt``` instead!
 
 ## Module details
 
