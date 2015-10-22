@@ -2,10 +2,10 @@ source "http://rubygems.org"
 
 gemspec
 
-gem 'rubygems-tasks', '> 0.2'
-gem 'rake', '> 0.9'
-gem 'rspec', '~> 2.11'
-gem 'yard', '~> 0.8'
+gem 'rubygems-tasks'
+gem 'rake'
+gem 'rspec', '~> 3.3'
+gem 'yard'
 
 platforms :rbx do
   gem 'racc'

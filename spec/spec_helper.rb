@@ -1,4 +1,4 @@
-gem 'rspec', '~> 2.4'
+gem 'rspec'
+
 require 'rspec'
 require 'sha3/version'
-

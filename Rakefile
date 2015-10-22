@@ -4,7 +4,7 @@ require 'rubygems'
 require 'rake'
 
 begin
-  gem 'rubygems-tasks', '~> 0.2'
+  gem 'rubygems-tasks'
   require 'rubygems/tasks'
 
   Gem::Tasks.new
@@ -14,7 +14,7 @@ rescue LoadError => e
 end
 
 begin
-  gem 'rspec', '~> 2.4'
+  gem 'rspec', '~> 3.3'
   require 'rspec/core/rake_task'
 
   RSpec::Core::RakeTask.new
@@ -28,10 +28,10 @@ task :test    => :spec
 task :default => [:compile, :spec]
 
 begin
-  gem 'yard', '~> 0.8'
+  gem 'yard'
   require 'yard'
 
-  YARD::Rake::YardocTask.new  
+  YARD::Rake::YardocTask.new
 rescue LoadError => e
   task :yard do
     abort "Please run `gem install yard` to install YARD."
@@ -54,4 +54,3 @@ rescue LoadError => e
     abort "Please run `gem install rake-compiler` to install Rake-Compiler."
   end
 end
-
