@@ -1,17 +1,19 @@
 /*
-The Keccak sponge function, designed by Guido Bertoni, Joan Daemen,
-Michaël Peeters and Gilles Van Assche. For more information, feedback or
-questions, please refer to our website: http://keccak.noekeon.org/
+Implementation by the Keccak, Keyak and Ketje Teams, namely, Guido Bertoni,
+Joan Daemen, Michaël Peeters, Gilles Van Assche and Ronny Van Keer, hereby
+denoted as "the implementer".
 
-Implementation by the designers,
-hereby denoted as "the implementer".
+For more information, feedback or questions, please refer to our websites:
+http://keccak.noekeon.org/
+http://keyak.noekeon.org/
+http://ketje.noekeon.org/
 
 To the extent possible under law, the implementer has waived all copyright
 and related or neighboring rights to the source code in this file.
 http://creativecommons.org/publicdomain/zero/1.0/
 */
 
-#if (Unrolling == 24)
+#if (defined(FullUnrolling))
 #define rounds \
     prepareTheta \
     thetaRhoPiChiIotaPrepareTheta( 0, A, E) \
@@ -38,7 +40,7 @@ http://creativecommons.org/publicdomain/zero/1.0/
     thetaRhoPiChiIotaPrepareTheta(21, E, A) \
     thetaRhoPiChiIotaPrepareTheta(22, A, E) \
     thetaRhoPiChiIota(23, E, A) \
-    copyToState(state, A)
+
 #elif (Unrolling == 12)
 #define rounds \
     prepareTheta \
@@ -56,7 +58,7 @@ http://creativecommons.org/publicdomain/zero/1.0/
         thetaRhoPiChiIotaPrepareTheta(i+10, A, E) \
         thetaRhoPiChiIotaPrepareTheta(i+11, E, A) \
     } \
-    copyToState(state, A)
+
 #elif (Unrolling == 8)
 #define rounds \
     prepareTheta \
@@ -70,7 +72,7 @@ http://creativecommons.org/publicdomain/zero/1.0/
         thetaRhoPiChiIotaPrepareTheta(i+6, A, E) \
         thetaRhoPiChiIotaPrepareTheta(i+7, E, A) \
     } \
-    copyToState(state, A)
+
 #elif (Unrolling == 6)
 #define rounds \
     prepareTheta \
@@ -82,7 +84,7 @@ http://creativecommons.org/publicdomain/zero/1.0/
         thetaRhoPiChiIotaPrepareTheta(i+4, A, E) \
         thetaRhoPiChiIotaPrepareTheta(i+5, E, A) \
     } \
-    copyToState(state, A)
+
 #elif (Unrolling == 4)
 #define rounds \
     prepareTheta \
@@ -92,7 +94,7 @@ http://creativecommons.org/publicdomain/zero/1.0/
         thetaRhoPiChiIotaPrepareTheta(i+2, A, E) \
         thetaRhoPiChiIotaPrepareTheta(i+3, E, A) \
     } \
-    copyToState(state, A)
+
 #elif (Unrolling == 3)
 #define rounds \
     prepareTheta \
@@ -102,7 +104,7 @@ http://creativecommons.org/publicdomain/zero/1.0/
         thetaRhoPiChiIotaPrepareTheta(i+2, A, E) \
         copyStateVariables(A, E) \
     } \
-    copyToState(state, A)
+
 #elif (Unrolling == 2)
 #define rounds \
     prepareTheta \
@@ -110,7 +112,7 @@ http://creativecommons.org/publicdomain/zero/1.0/
         thetaRhoPiChiIotaPrepareTheta(i  , A, E) \
         thetaRhoPiChiIotaPrepareTheta(i+1, E, A) \
     } \
-    copyToState(state, A)
+
 #elif (Unrolling == 1)
 #define rounds \
     prepareTheta \
@@ -118,7 +120,7 @@ http://creativecommons.org/publicdomain/zero/1.0/
         thetaRhoPiChiIotaPrepareTheta(i  , A, E) \
         copyStateVariables(A, E) \
     } \
-    copyToState(state, A)
+
 #else
 #error "Unrolling is not correctly specified!"
 #endif
