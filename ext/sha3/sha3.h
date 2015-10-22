@@ -5,7 +5,7 @@
 
 #include <ruby.h>
 
-#include "KeccakNISTInterface.h"
+#include "KeccakHash.h"
 #include "digest.h"
 
 #ifdef  __cplusplus

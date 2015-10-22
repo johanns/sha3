@@ -27,7 +27,7 @@ extern VALUE cSHA3Digest;
 extern VALUE eSHA3DigestError;
 
 typedef struct {
-  hashState *state;
+  Keccak_HashInstance *state;
   int hashbitlen;
 } MDX;
 
