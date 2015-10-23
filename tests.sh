@@ -3,22 +3,24 @@
 rm -fv spec/sha3_compute*.rb
 rm -fv spec/sha3_digest*.rb
 
-if [ -d "spec/data" ] 
+if [ -d "spec/data" ]
 then
   rm -rfv spec/data/*
 else
   mkdir "spec/data"
 fi
 
-cd "spec/data"
+pushd "spec/data"
 
-if [ -f "KeccakTestVectors.zip" ] 
+if [ -f "*.txt" ]
 then
-  rm -v "KeccakTestVectors.zip"
+  rm -v *.txt
 fi
 
-wget "http://cloud.github.com/downloads/johanns/sha3/KeccakTestVectors.zip"
-unzip KeccakTestVectors.zip
+wget "https://raw.githubusercontent.com/gvanas/KeccakCodePackage/master/TestVectors/ShortMsgKAT_SHA3-224.txt"
+wget "https://raw.githubusercontent.com/gvanas/KeccakCodePackage/master/TestVectors/ShortMsgKAT_SHA3-256.txt"
+wget "https://raw.githubusercontent.com/gvanas/KeccakCodePackage/master/TestVectors/ShortMsgKAT_SHA3-384.txt"
+wget "https://raw.githubusercontent.com/gvanas/KeccakCodePackage/master/TestVectors/ShortMsgKAT_SHA3-512.txt"
 
 cd ".."
 
