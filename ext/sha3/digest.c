@@ -58,7 +58,8 @@ static VALUE c_digest_alloc(VALUE klass)
 
 static VALUE c_digest_update(VALUE, VALUE);
 
-HashReturn c_keccak_hash_initialize(MDX *mdx) {
+HashReturn c_keccak_hash_initialize(MDX *mdx)
+{
   HashReturn r = FAIL;
 
   switch (mdx->hashbitlen) {
@@ -76,7 +77,7 @@ HashReturn c_keccak_hash_initialize(MDX *mdx) {
       break;
     }
 
-    return r;
+  return r;
 }
 
 // SHA3::Digest.new(type, [data]) -> self
