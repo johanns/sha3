@@ -1,12 +1,11 @@
 language: ruby
 rvm:
-  - 2.2.2
+  - ruby-head
   - 2.1.0
   - 2.0.0
   - 1.9.3
   - 1.9.2
   - 1.8.7
-  - ruby-head
   - rbx-2
 
 gemfile: Gemfile.ci
@@ -14,3 +13,7 @@ gemfile: Gemfile.ci
 branches:
   only:
     - master
+
+os:
+  - linux
+  - osx
