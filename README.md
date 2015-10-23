@@ -2,7 +2,7 @@
 
 [![Gem Version](https://badge.fury.io/rb/sha3.svg)](https://badge.fury.io/rb/sha3) [![CI](https://secure.travis-ci.org/johanns/sha3.png)](https://secure.travis-ci.org/johanns/sha3) [![Dependencies](https://gemnasium.com/johanns/sha3.png)](https://gemnasium.com/johanns/sha3) [![CodeClimate](https://codeclimate.com/github/johanns/sha3.png)](https://codeclimate.com/github/johanns/sha3)
 
-**SHA3 for Ruby** is a native (C) FIPS 202 compliant implementation of SHA3 (Keccak) cryptographic hashing algorithm.
+**SHA3 for Ruby** is a native (C) binding to SHA3 (Keccak FIPS 202) cryptographic hashing algorithm.
 
 - Home :: [https://github.com/johanns/sha3#readme]()
 - Issues :: [https://github.com/johanns/sha3/issues]()
@@ -10,12 +10,14 @@
 
 ## Warnings
 
-- Version 1.0+ breaks compatibilty with previous versions of this gem (i.e., Keccak != SHA3 FIPS 202)
-- Do NOT hash passwords; use ```bcrypt``` or ```scrypt``` instead!
+- Version 1.0+ breaks compatibility with previous versions of this gem.
+- Do NOT use SHA3 to hash passwords; use either ```bcrypt``` or ```scrypt``` instead!
 
 ## Module details
 
-**SHA3::Digest**: A standard *Digest* _subclass_. The interface, and operation of this class are parallel to digest classes bundled with MRI-based Rubies (e.g.: **Digest::SHA2**, and **OpenSSL::Digest**). See *Digest* documentation for additional details ([http://www.ruby-doc.org/stdlib-1.9.3/libdoc/digest/rdoc/Digest.html]()).
+**SHA3::Digest**: A standard *Digest* _subclass_. The interface, and operation of this class are parallel to digest classes bundled with MRI-based Rubies (e.g.: **Digest::SHA2**, and **OpenSSL::Digest**).
+
+See [documentation for Ruby's **Digest** class for additional details](http://www.ruby-doc.org/stdlib-2.2.3/libdoc/digest/rdoc/Digest.html).
 
 ## Installation
 
@@ -107,13 +109,12 @@ Only a small subset of test vectors are included in the source repository; howev
 
 Tested with Rubies:
 
-  - MRI 2.2.2
+  - MRI Ruby-Head
   - MRI 2.1.0
   - MRI 2.0.0
   - MRI 1.9.3
   - MRI 1.9.2
   - MRI 1.8.7
-  - MRI Ruby-Head
   - Rubinius 2
 
 On:
@@ -124,7 +125,7 @@ On:
 
 ## Releases
 
-- *1.0.1* :: FIPS 202 compliance (breaks compatiblity with earlier releases)
+- *1.0.1* :: FIPS 202 compliance (breaks compatibility with earlier releases)
 - *0.2.6* :: Fixed bug #4
 - *0.2.5* :: Bug fixes. (See ChangeLog.rdoc)
 - *0.2.4* :: Bug fixes. (YANKED)
@@ -133,7 +134,7 @@ On:
 - *0.2.0* :: Production worthy, but breaks API compatibility with 0.1.x. Backward-compatibility will be maintained henceforth.
 - *0.1.x* :: Alpha code, and not suitable for production.
 
-## TO DO:
+## TO DO
 
 - Add SHAKE128/256 support
 
