@@ -101,7 +101,7 @@ s = SHA3::Digest.file("tests.sh")
 
 Call ```rake``` to run the included RSpec tests.
 
-Only a small subset of test vectors are included in the source repository; however, the complete test vectors suite is available for download. Simply run the +tests.sh+ shell script (available in the root of source directory) to generate full bit-length RSpec test files.
+Only a small subset of test vectors are included in the source repository; however, the complete test vectors suite is available for download. Simply run the ```tests.sh``` shell script (available in the root of source directory) to generate full byte-length RSpec test files.
 
   ```sh tests.sh```
 
