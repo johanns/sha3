@@ -4,9 +4,9 @@
 
 **SHA3 for Ruby** is a native (C) binding to SHA3 (Keccak FIPS 202) cryptographic hashing algorithm.
 
-- Home :: [https://github.com/johanns/sha3#readme]()
-- Issues :: [https://github.com/johanns/sha3/issues]()
-- Documentation :: [http://rubydoc.info/gems/sha3/frames]()
+- [Home](https://github.com/johanns/sha3#readme)
+- [Issues](https://github.com/johanns/sha3/issues)
+- [Documentation](http://rubydoc.info/gems/sha3/frames)
 
 ## Warnings
 
