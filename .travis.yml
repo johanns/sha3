@@ -1,11 +1,17 @@
 language: ruby
 rvm:
   - ruby-head
-  - 2.1.0
-  - 2.0.0
-  - 1.9.3
+  - ruby-head-clang
+  - 2.5.0
+  - 2.4.3
+  - 2.3.6
+  - 2.2.9
+  - 2.1.10
+  - 2.0.0-p648
+  - 1.9.3-p551
   - 1.9.2
   - 1.8.7
+  - rbx-3
   - rbx-2
 
 gemfile: Gemfile.ci
@@ -17,7 +23,3 @@ branches:
 os:
   - linux
   - osx
-
-matrix:
-  allow_failures:
-    - os: osx
