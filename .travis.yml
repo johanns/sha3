@@ -1,25 +1,31 @@
-language: ruby
-rvm:
-  - ruby-head
-  - ruby-head-clang
-  - 2.5.0
-  - 2.4.3
-  - 2.3.6
-  - 2.2.9
-  - 2.1.10
-  - 2.0.0-p648
-  - 1.9.3-p551
-  - 1.9.2
-  - 1.8.7
-  - rbx-3
-  - rbx-2
-
-gemfile: Gemfile.ci
+arch:
+  - amd64
+  - arm64 
 
 branches:
   only:
     - master
+    - develop
+
+gemfile: Gemfile.ci
+
+language: ruby
 
 os:
   - linux
-  - osx
+
+rvm:
+  - ruby-head
+  - 2.7
+  - 2.6
+  - 2.5
+  - 2.4
+  - 2.3
+  - 2.2
+  - 2.1
+  - 2.0
+  - 1.9
+  - 1.8
+  - rbx-3
+  - rbx-2
+  - truffleruby
