@@ -1,6 +1,6 @@
 # sha3  
 
-[![Gem Version](https://badge.fury.io/rb/sha3.svg)](https://badge.fury.io/rb/sha3) [![CI](https://secure.travis-ci.org/johanns/sha3.png)](https://secure.travis-ci.org/johanns/sha3) [![Dependencies](https://gemnasium.com/johanns/sha3.png)](https://gemnasium.com/johanns/sha3) [![CodeClimate](https://codeclimate.com/github/johanns/sha3.png)](https://codeclimate.com/github/johanns/sha3)
+[![Gem Version](https://badge.fury.io/rb/sha3.svg)](https://badge.fury.io/rb/sha3) [![CI](https://secure.travis-ci.org/johanns/sha3.png)](https://secure.travis-ci.org/johanns/sha3) [![CodeClimate](https://codeclimate.com/github/johanns/sha3.png)](https://codeclimate.com/github/johanns/sha3)
 
 **SHA3 for Ruby** is a native (C) binding to SHA3 (Keccak FIPS 202) cryptographic hashing algorithm.
 
@@ -10,8 +10,8 @@
 
 ## Warnings
 
-- Version 1.0+ breaks compatibility with previous versions of this gem.
-- Do NOT use SHA3 to hash passwords; use either ```bcrypt``` or ```scrypt``` instead!
+- Please do NOT use SHA3 to hash passwords -- use a slow hashing function instead (e.g.: `pbkdf2`, `argon2`, `bcrypt` or `scrypt`)
+- Version 1.0 introduces new API and is incompatible with previous versions (0.x).
 
 ## Module details
 
@@ -97,7 +97,7 @@ s = SHA3::Digest.file("tests.sh")
 * Native build tools (e.g., GCC, Minigw, etc.)
 * Gems: rubygems-tasks, rake, rspec, yard
 
-### Testing + RSpec
+### Testing
 
 Call ```rake``` to run the included RSpec tests.
 
@@ -107,39 +107,14 @@ Only a small subset of test vectors are included in the source repository; howev
 
 ### Rubies
 
-Tested with Rubies:
+Supported Ruby versions:
 
-  - MRI Ruby-Head
-  - MRI 2.1.0
-  - MRI 2.0.0
-  - MRI 1.9.3
-  - MRI 1.9.2
-  - MRI 1.8.7
-  - Rubinius 2
+  - MRI Ruby 2.4 - 3.0
 
-On:
 
-  - Ubuntu 12.04, 12.10, 13.04, 14.04, 15.04
-  - Windows 7, 8, 8.1, 10
-  - Mac OS X 10.6 - 10.11
-
-## Releases
-
-- *1.0.1* :: FIPS 202 compliance (breaks compatibility with earlier releases)
-- *0.2.6* :: Fixed bug #4
-- *0.2.5* :: Bug fixes. (See ChangeLog.rdoc)
-- *0.2.4* :: Bug fixes. (YANKED)
-- *0.2.3* :: Added documentation file (decoupled form C source); refactored C source.
-- *0.2.2* :: Added sub-class for each SHA3 supported bit-lengths (example: SHA3::Digest::SHA256). Minor bug fix.
-- *0.2.0* :: Production worthy, but breaks API compatibility with 0.1.x. Backward-compatibility will be maintained henceforth.
-- *0.1.x* :: Alpha code, and not suitable for production.
-
-## TO DO
-
-- Add SHAKE128/256 support
 
 ## Copyright
 
-Copyright (c) 2012 - 2015 Johanns Gregorian (https://github.com/johanns)
+Copyright (c) 2012 - 2020 Johanns Gregorian (https://github.com/johanns)
 
 **See LICENSE.txt for details.**
