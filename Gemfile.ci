@@ -1,14 +1,8 @@
-source "http://rubygems.org"
+source 'http://rubygems.org'
 
 gemspec
 
-gem 'rubygems-tasks'
 gem 'rake'
-gem 'rspec', '~> 3.3'
+gem 'rspec'
+gem 'rubygems-tasks'
 gem 'yard'
-
-platforms :rbx do
-  gem 'racc'
-  gem 'rubysl', '~> 2.0'
-  gem 'psych'
-end
