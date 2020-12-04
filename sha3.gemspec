@@ -16,8 +16,8 @@ Gem::Specification.new do |gem|
   gem.require_paths = ['lib']
   gem.extensions    = ['ext/sha3/extconf.rb']
 
-  gem.add_development_dependency 'rake-compiler'
-  gem.add_development_dependency 'rspec'
-  gem.add_development_dependency 'rubygems-tasks'
-  gem.add_development_dependency 'yard'
+  gem.add_development_dependency 'rake-compiler', '~> 1.1'
+  gem.add_development_dependency 'rspec', '~> 3.3'
+  gem.add_development_dependency 'rubygems-tasks', '~> 0.2'
+  gem.add_development_dependency 'yard', '~> 0.9'
 end
