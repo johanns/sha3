@@ -17,5 +17,10 @@ end
 find_header("sha3.h")
 find_header("digest.h")
 
-$CFLAGS = ' -fomit-frame-pointer -O3 -g0 -march=native '
+$CFLAGS = ' -fomit-frame-pointer -O3 -g0'
+
+if enable_config('march-tune-native', false)
+  $CFLAGS += ' -march=native'
+end
+
 create_makefile 'sha3_n'
