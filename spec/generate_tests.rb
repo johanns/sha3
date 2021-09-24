@@ -47,4 +47,3 @@ end
 def setup; end
 
 gen_digest_byte_tests
-gen_compute_bit_tests
