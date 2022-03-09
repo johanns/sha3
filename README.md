@@ -1,6 +1,6 @@
 # sha3  
 
-[![Gem Version](https://badge.fury.io/rb/sha3.svg)](https://badge.fury.io/rb/sha3) [![CI](https://secure.travis-ci.org/johanns/sha3.png)](https://secure.travis-ci.org/johanns/sha3) [![CodeClimate](https://codeclimate.com/github/johanns/sha3.png)](https://codeclimate.com/github/johanns/sha3)
+[![Gem Version](https://badge.fury.io/rb/sha3.svg)](https://badge.fury.io/rb/sha3)[![Ruby](https://github.com/johanns/sha3/actions/workflows/main.yml/badge.svg)](https://github.com/johanns/sha3/actions/workflows/main.yml)
 
 **SHA3 for Ruby** is a native (C) binding to SHA3 (Keccak FIPS 202) cryptographic hashing algorithm.
 
@@ -109,7 +109,7 @@ Only a small subset of test vectors are included in the source repository; howev
 
 Supported Ruby versions:
 
-  - MRI Ruby 2.4 - 3.0
+  - MRI Ruby 2.4 - 3.1
 
 
 
