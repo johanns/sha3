@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Based on python-sha3's / digest-sha3 test generator.
 
 FILES = [
@@ -22,7 +24,7 @@ describe "SHA3::Digest.new(#{hashlen})" do
     )
     contents = File.read(path).split('Len = ')
     contents.each do |test|
-      lines = test.split("\n")
+      lines = test.split('\n')
       next unless !lines.empty? && lines[0] !~ /^#/
 
       length = lines[0].to_i
