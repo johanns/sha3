@@ -232,3 +232,6 @@ build-iPhoneSimulator/
 .ionide
 
 # End of https://www.toptal.com/developers/gitignore/api/c,clion,visualstudiocode,ruby
+
+lib/*.bundle
+.rspec_status
