@@ -1,23 +1,50 @@
-require File.expand_path('lib/sha3/version', __dir__)
+# frozen_string_literal: true
 
-Gem::Specification.new do |gem|
-  gem.name          = 'sha3'
-  gem.version       = SHA3::VERSION
-  gem.summary       = 'SHA3 for Ruby'
-  gem.description   = 'SHA3 for Ruby is a native (C) FIPS 202 compliant implementation of SHA3 (Keccak) cryptographic hashing algorithm.'
-  gem.license       = 'MIT'
-  gem.authors       = ['Johanns Gregorian']
-  gem.email         = 'io+sha3@jsg.io'
-  gem.homepage      = 'https://github.com/johanns/sha3#readme'
+require_relative 'lib/sha3/version'
 
-  gem.files         = `git ls-files`.split($/)
-  gem.executables   = gem.files.grep(%r{^bin/}).map { |f| File.basename(f) }
-  gem.test_files    = gem.files.grep(%r{^(test|spec|features)/})
-  gem.require_paths = ['lib']
-  gem.extensions    = ['ext/sha3/extconf.rb']
+Gem::Specification.new do |spec|
+  spec.name = 'sha3'
+  spec.version = SHA3::VERSION
 
-  gem.add_development_dependency 'rake-compiler', '~> 1.1'
-  gem.add_development_dependency 'rspec', '~> 3.3'
-  gem.add_development_dependency 'rubygems-tasks', '~> 0.2'
-  gem.add_development_dependency 'yard', '~> 0.9'
+  spec.authors = ['Johanns Gregorian']
+  spec.email = ['io+sha3@jsg.io']
+
+  spec.description = 'SHA3 for Ruby is a native (C) FIPS 202 compliant implementation of SHA3 (Keccak) cryptographic hashing algorithm.'
+  spec.summary = 'SHA3 (FIPS 202) cryptographic hashing algorithm'
+
+  spec.homepage = 'https://github.com/johanns/sha3'
+  spec.license = 'MIT'
+  spec.required_ruby_version = '>= 2.6.0'
+
+  spec.metadata['changelog_uri'] = "#{spec.homepage}/CHANGELOG.md"
+  spec.metadata['homepage_uri'] = spec.homepage
+  spec.metadata['source_code_uri'] = spec.homepage
+
+  # Specify which files should be added to the gem when it is released.
+  # The `git ls-files -z` loads the files in the RubyGem that have been added into git.
+  spec.files = Dir.chdir(File.expand_path(__dir__)) do
+    `git ls-files -z`.split("\x0").reject do |f|
+      (f == __FILE__) || f.match(%r{\A(?:(?:bin|test|spec|features)/|\.(?:git|travis|circleci)|appveyor)})
+    end
+  end
+
+  spec.bindir = 'exe'
+  spec.executables = spec.files.grep(%r{\Aexe/}) { |f| File.basename(f) }
+  spec.extensions = ['ext/sha3/extconf.rb']
+  spec.require_paths = ['lib']
+
+  # Uncomment to register a new dependency of your gem
+  # spec.add_dependency "example-gem", "~> 1.0"
+
+  # For more information and examples about making a new gem, check out our
+  # guide at: https://bundler.io/guides/creating_gem.html
+  spec.metadata['rubygems_mfa_required'] = 'true'
+
+  spec.add_development_dependency('bundler', '~> 2.3')
+  spec.add_development_dependency('rake', '~> 13.0')
+  spec.add_development_dependency('rake-compiler', '~> 1.1')
+  spec.add_development_dependency('rspec', '~> 3.11')
+  spec.add_development_dependency('rubocop', '~> 1.25')
+  spec.add_development_dependency('rubocop-rake', '~> 0.6')
+  spec.add_development_dependency('rubocop-rspec', '~> 2.9')
 end
