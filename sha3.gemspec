@@ -47,4 +47,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency('rubocop', '~> 1.25')
   spec.add_development_dependency('rubocop-rake', '~> 0.6')
   spec.add_development_dependency('rubocop-rspec', '~> 2.9')
+
+  spec.cert_chain = ['certs/johanns.pem']
+  spec.signing_key = File.expand_path('~/.ssh/gem-private_key.pem') if $PROGRAM_NAME =~ /gem\z/
 end
