@@ -1,6 +1,6 @@
 # sha3  
 
-[![Gem Version](https://badge.fury.io/rb/sha3.svg)](https://badge.fury.io/rb/sha3)[![Ruby](https://github.com/johanns/sha3/actions/workflows/main.yml/badge.svg)](https://github.com/johanns/sha3/actions/workflows/main.yml)
+[![Gem Version](https://badge.fury.io/rb/sha3.svg)](https://badge.fury.io/rb/sha3) [![Ruby](https://github.com/johanns/sha3/actions/workflows/main.yml/badge.svg)](https://github.com/johanns/sha3/actions/workflows/main.yml)
 
 **SHA3 for Ruby** is a native (C) binding to SHA3 (Keccak FIPS 202) cryptographic hashing algorithm.
 
@@ -115,6 +115,6 @@ Supported Ruby versions:
 
 ## Copyright
 
-Copyright (c) 2012 - 2020 Johanns Gregorian (https://github.com/johanns)
+Copyright (c) 2012 - 2022 Johanns Gregorian (https://github.com/johanns)
 
 **See LICENSE.txt for details.**
