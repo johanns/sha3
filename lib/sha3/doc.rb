@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'digest'
 
 module SHA3
@@ -99,8 +101,7 @@ module SHA3
     # @example
     #   SHA3::Digest.hexdigest(256, 'compute me, please')
     #   SHA3::Digest::SHA256.hexdigest('compute me, please') # => Alternate syntax
-    def self.hexdigest(type, data)
-    end
+    def self.hexdigest(type, data); end
 
     # Returns computed hash value for given hash type, and data in bytes.
     #
@@ -112,8 +113,7 @@ module SHA3
     # @example
     #   SHA3::Digest.digest(256, 'compute me, please')
     #   SHA3::Digest::SHA256.digest('compute me, please') # => Alternate syntax
-    def self.digest(type, data)
-    end
+    def self.digest(type, data); end
   end
 
   class DigestError < StandardError
