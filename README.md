@@ -94,7 +94,7 @@ s = SHA3::Digest.file("tests.sh")
 
 ## Development
 
-* Native build tools (e.g., GCC, Minigw, etc.)
+* Native build tools (e.g., GCC, MinGW, etc.)
 * Gems: rubygems-tasks, rake, rspec, yard
 
 ### Testing
@@ -109,7 +109,7 @@ Only a small subset of test vectors are included in the source repository; howev
 
 Supported Ruby versions:
 
-  - MRI Ruby 2.4 - 3.1
+  - MRI Ruby 2.6 - 3.1
 
 
 
