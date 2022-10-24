@@ -43,11 +43,11 @@ Gem::Specification.new do |spec|
 
   spec.add_development_dependency('bundler', '~> 2.3')
   spec.add_development_dependency('rake', '~> 13.0')
-  spec.add_development_dependency('rake-compiler', '~> 1.1')
+  spec.add_development_dependency('rake-compiler', '~> 1.2')
   spec.add_development_dependency('rspec', '~> 3.11')
-  spec.add_development_dependency('rubocop', '~> 1.25')
+  spec.add_development_dependency('rubocop', '~> 1.37')
   spec.add_development_dependency('rubocop-rake', '~> 0.6')
-  spec.add_development_dependency('rubocop-rspec', '~> 2.9')
+  spec.add_development_dependency('rubocop-rspec', '~> 2.14')
 
   spec.cert_chain = ['certs/johanns.pem']
   spec.signing_key = File.expand_path('~/.ssh/gem-private_key.pem') if $PROGRAM_NAME =~ /gem\z/
