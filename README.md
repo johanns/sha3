@@ -2,13 +2,14 @@
 
 [![Gem Version](https://badge.fury.io/rb/sha3.svg)](https://badge.fury.io/rb/sha3) [![Ruby](https://github.com/johanns/sha3/actions/workflows/main.yml/badge.svg)](https://github.com/johanns/sha3/actions/workflows/main.yml)
 
-**SHA3 for Ruby** is a native (C) binding to SHA3 (Keccak FIPS 202) cryptographic hashing algorithm.
+**SHA3 for Ruby** is a XKCP based native (C) binding to SHA3 (FIPS 202) cryptographic hashing algorithm.
 
 - [Home](https://github.com/johanns/sha3#readme)
 - [Issues](https://github.com/johanns/sha3/issues)
 - [Documentation](http://rubydoc.info/gems/sha3/frames)
+- [XKCP - eXtended Keccak Code Package](https://github.com/XKCP/XKCP)
 
-## Warnings
+## Warning
 
 - Please do NOT use SHA3 to hash passwords -- use a slow hashing function instead (e.g.: `pbkdf2`, `argon2`, `bcrypt` or `scrypt`)
 - Version 1.0 introduces new API and is incompatible with previous versions (0.x).
@@ -92,9 +93,9 @@ s = SHA3::Digest.file("tests.sh")
 # => #<SHA3::Digest: a9801db49389339...>
 ```
 
-## Development
+### Development Dependencies
 
-* Native build tools (e.g., GCC, MinGW, etc.)
+* Native build tools (e.g., Clang/LLVM, GCC, Minigw, etc.)
 * Gems: rubygems-tasks, rake, rspec, yard
 
 ### Testing
@@ -111,7 +112,9 @@ Supported Ruby versions:
 
   - MRI Ruby 2.6 - 3.1
 
+## Credits
 
+XKCP by Keccak team: [https://keccak.team/index.html]()
 
 ## Copyright
 
