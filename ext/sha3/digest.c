@@ -64,7 +64,7 @@ static VALUE c_digest_update(VALUE, VALUE);
 
 HashReturn c_keccak_hash_initialize(MDX *mdx)
 {
-    HashReturn r = FAIL;
+    HashReturn r = KECCAK_FAIL;
 
     switch (mdx->hashbitlen)
     {
@@ -103,7 +103,7 @@ static VALUE c_digest_init(int argc, VALUE *argv, VALUE self)
         mdx->hashbitlen = 256;
     }
 
-    if (c_keccak_hash_initialize(mdx) != SUCCESS)
+    if (c_keccak_hash_initialize(mdx) != KECCAK_SUCCESS)
     {
         rb_raise(eSHA3DigestError, "failed to initialize algorithm state");
     }
@@ -120,14 +120,14 @@ static VALUE c_digest_init(int argc, VALUE *argv, VALUE self)
 static VALUE c_digest_update(VALUE self, VALUE data)
 {
     MDX *mdx;
-    DataLength dlen;
+    BitLength dlen;
 
     StringValue(data);
     GETMDX(self, mdx);
 
     dlen = (RSTRING_LEN(data) * 8);
 
-    if (Keccak_HashUpdate(mdx->state, (BitSequence *)RSTRING_PTR(data), dlen) != SUCCESS)
+    if (Keccak_HashUpdate(mdx->state, (BitSequence *)RSTRING_PTR(data), dlen) != KECCAK_SUCCESS)
     {
         rb_raise(eSHA3DigestError, "failed to update hash data");
     }
@@ -144,7 +144,7 @@ static VALUE c_digest_reset(VALUE self)
 
     memset(mdx->state, 0, sizeof(Keccak_HashInstance));
 
-    if (c_keccak_hash_initialize(mdx) != SUCCESS)
+    if (c_keccak_hash_initialize(mdx) != KECCAK_SUCCESS)
     {
         rb_raise(eSHA3DigestError, "failed to reset internal state");
     }
@@ -236,7 +236,7 @@ static VALUE c_digest_finish(int argc, VALUE *argv, VALUE self)
         rb_str_resize(str, mdx->hashbitlen / 8);
     }
 
-    if (Keccak_HashFinal(mdx->state, (BitSequence *)RSTRING_PTR(str)) != SUCCESS)
+    if (Keccak_HashFinal(mdx->state, (BitSequence *)RSTRING_PTR(str)) != KECCAK_SUCCESS)
     {
         rb_raise(eSHA3DigestError, "failed to finalize digest");
     }
