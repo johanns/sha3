@@ -17,6 +17,7 @@ RSpec.describe SHA3 do
   end
 end
 
+# rubocop:disable Metrics/BlockLength(RuboCop)
 RSpec.describe SHA3::Digest do
   it 'passes Digest.new() (default: :sha256) usage test' do
     sha = described_class.new
@@ -88,6 +89,15 @@ RSpec.describe SHA3::Digest do
     expect(sha.digest_length).to eq(64)
     expect(sha.block_length).to eq(72)
   end
+
+  it 'does not Segfault due to buffer overflow vulnerability' do
+    sha = described_class.new(:sha224)
+
+    sha.update("\x00" * 1)
+    sha.update("\x00" * 4294967295)
+
+    expect(sha.hexdigest).to eq('c5bcc3bc73b5ef45e91d2d7c70b64f196fac08eee4e4acf6e6571ebe')
+  end
 end
 
 RSpec.describe 'SHA3::Digest::SHAxyz' do
@@ -148,3 +158,4 @@ RSpec.describe 'SHA3::Digest::SHAxyz' do
     expect(sha.block_length).to eq(72)
   end
 end
+# rubocop:enable Metrics/BlockLength(RuboCop)
