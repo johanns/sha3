@@ -41,7 +41,6 @@ Gem::Specification.new do |spec|
   # guide at: https://bundler.io/guides/creating_gem.html
   spec.metadata['rubygems_mfa_required'] = 'true'
 
-  spec.add_development_dependency('bundler', '~> 2.3')
   spec.add_development_dependency('rake', '~> 13.0')
   spec.add_development_dependency('rake-compiler', '~> 1.2')
   spec.add_development_dependency('rspec', '~> 3.11')
