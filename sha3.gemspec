@@ -2,6 +2,7 @@
 
 require_relative 'lib/sha3/version'
 
+# rubocop:disable Metrics/BlockLength(Rubocop)
 Gem::Specification.new do |spec|
   spec.name = 'sha3'
   spec.version = SHA3::VERSION
@@ -9,7 +10,7 @@ Gem::Specification.new do |spec|
   spec.authors = ['Johanns Gregorian']
   spec.email = ['io+sha3@jsg.io']
 
-  spec.description = 'SHA3 for Ruby is a native (C) FIPS 202 compliant implementation of SHA3 (Keccak) cryptographic hashing algorithm.'
+  spec.description = 'A XKCP based native (C) binding to SHA3 (FIPS 202) cryptographic hashing algorithm.'
   spec.summary = 'SHA3 (FIPS 202) cryptographic hashing algorithm'
 
   spec.homepage = 'https://github.com/johanns/sha3'
@@ -51,3 +52,4 @@ Gem::Specification.new do |spec|
   spec.cert_chain = ['certs/johanns.pem']
   spec.signing_key = File.expand_path('~/.ssh/gem-private_key.pem') if $PROGRAM_NAME =~ /gem\z/
 end
+# rubocop:enable Metrics/BlockLength(Rubocop)
