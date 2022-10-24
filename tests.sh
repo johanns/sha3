@@ -11,18 +11,19 @@ else
 fi
 
 pushd "spec/data"
-
 if [ -f "*.txt" ]
 then
     rm -v *.txt
 fi
 
-wget "https://raw.githubusercontent.com/XKCP/XKCP/master/tests/TestVectors/ShortMsgKAT_SHA3-224.txt"
-wget "https://raw.githubusercontent.com/XKCP/XKCP/master/tests/TestVectors/ShortMsgKAT_SHA3-256.txt"
-wget "https://raw.githubusercontent.com/XKCP/XKCP/master/tests/TestVectors/ShortMsgKAT_SHA3-384.txt"
-wget "https://raw.githubusercontent.com/XKCP/XKCP/master/tests/TestVectors/ShortMsgKAT_SHA3-512.txt"
+curl "https://raw.githubusercontent.com/XKCP/XKCP/master/tests/TestVectors/ShortMsgKAT_SHA3-224.txt" > ShortMsgKAT_SHA3-224.txt
+curl "https://raw.githubusercontent.com/XKCP/XKCP/master/tests/TestVectors/ShortMsgKAT_SHA3-256.txt" > ShortMsgKAT_SHA3-256.txt
+curl "https://raw.githubusercontent.com/XKCP/XKCP/master/tests/TestVectors/ShortMsgKAT_SHA3-384.txt" > ShortMsgKAT_SHA3-384.txt
+curl "https://raw.githubusercontent.com/XKCP/XKCP/master/tests/TestVectors/ShortMsgKAT_SHA3-512.txt" > ShortMsgKAT_SHA3-512.txt
+popd
 
-cd ".."
-
+pushd spec
 ruby generate_tests.rb
+popd
+
 rake
