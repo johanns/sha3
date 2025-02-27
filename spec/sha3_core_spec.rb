@@ -19,7 +19,7 @@ end
 
 # rubocop:disable Metrics/BlockLength(RuboCop)
 RSpec.describe SHA3::Digest do
-  it 'passes Digest.new() (default: :sha256) usage test' do
+  it 'passes Digest.new() (default: :sha3_256) usage test' do
     sha = described_class.new
 
     expect(sha.hexdigest).to eq('a7ffc6f8bf1ed76651c14756a061d662f580ff4de43b49fa82d80a4b80f8434a')
@@ -33,8 +33,8 @@ RSpec.describe SHA3::Digest do
     expect(sha.block_length).to eq(136)
   end
 
-  it 'passes Digest.new(:sha224) usage test' do
-    sha = described_class.new(:sha224)
+  it 'passes Digest.new(:sha3_224) usage test' do
+    sha = described_class.new(:sha3_224)
 
     expect(sha.hexdigest).to eq('6b4e03423667dbb73b6e15454f0eb1abd4597f9a1b078e3f5b5a6bc7')
     expect(sha.update(['cc'].pack('H*'))).to eq('df70adc49b2e76eee3a6931b93fa41841c3af2cdf5b32a18b5478c39')
@@ -47,8 +47,8 @@ RSpec.describe SHA3::Digest do
     expect(sha.block_length).to eq(144)
   end
 
-  it 'passes Digest.new(:sha256) usage test' do
-    sha = described_class.new(:sha256)
+  it 'passes Digest.new(:sha3_256) usage test' do
+    sha = described_class.new(:sha3_256)
 
     expect(sha.hexdigest).to eq('a7ffc6f8bf1ed76651c14756a061d662f580ff4de43b49fa82d80a4b80f8434a')
     expect(sha.update(['cc'].pack('H*'))).to eq('677035391cd3701293d385f037ba32796252bb7ce180b00b582dd9b20aaad7f0')
@@ -61,8 +61,8 @@ RSpec.describe SHA3::Digest do
     expect(sha.block_length).to eq(136)
   end
 
-  it 'passes Digest.new(:sha384) usage test' do
-    sha = described_class.new(:sha384)
+  it 'passes Digest.new(:sha3_384) usage test' do
+    sha = described_class.new(:sha3_384)
 
     expect(sha.hexdigest).to eq('0c63a75b845e4f7d01107d852e4c2485c51a50aaaa94fc61995e71bbee983a2ac3713831264adb47fb6bd1e058d5f004')
 
@@ -76,8 +76,8 @@ RSpec.describe SHA3::Digest do
     expect(sha.block_length).to eq(104)
   end
 
-  it 'passes Digest.new(:sha512) usage test' do
-    sha = described_class.new(:sha512)
+  it 'passes Digest.new(:sha3_512) usage test' do
+    sha = described_class.new(:sha3_512)
 
     expect(sha.hexdigest).to eq('a69f73cca23a9ac5c8b567dc185a756e97c982164fe25859e0d1dcc1475c80a615b2123af1f5f94c11e3e9402c3ac558f500199d95b6d3e301758586281dcd26')
     expect(sha.update(['cc'].pack('H*'))).to eq('3939fcc8b57b63612542da31a834e5dcc36e2ee0f652ac72e02624fa2e5adeecc7dd6bb3580224b4d6138706fc6e80597b528051230b00621cc2b22999eaa205')
@@ -91,7 +91,7 @@ RSpec.describe SHA3::Digest do
   end
 
   it 'does not Segfault due to buffer overflow vulnerability' do
-    sha = described_class.new(:sha224)
+    sha = described_class.new(:sha3_224)
 
     sha.update("\x00" * 1)
     sha.update("\x00" * 4294967295)
@@ -101,8 +101,8 @@ RSpec.describe SHA3::Digest do
 end
 
 RSpec.describe 'SHA3::Digest::SHAxyz' do
-  it 'passes Digest.SHA224() usage test' do
-    sha = SHA3::Digest::SHA224.new
+  it 'passes Digest.SHA3_224() usage test' do
+    sha = SHA3::Digest::SHA3_224.new
 
     expect(sha.hexdigest).to eq('6b4e03423667dbb73b6e15454f0eb1abd4597f9a1b078e3f5b5a6bc7')
     expect(sha.update(['cc'].pack('H*'))).to eq('df70adc49b2e76eee3a6931b93fa41841c3af2cdf5b32a18b5478c39')
@@ -115,8 +115,8 @@ RSpec.describe 'SHA3::Digest::SHAxyz' do
     expect(sha.block_length).to eq(144)
   end
 
-  it 'passes Digest.SHA256() usage test' do
-    sha = SHA3::Digest::SHA256.new
+  it 'passes Digest.SHA3_256() usage test' do
+    sha = SHA3::Digest::SHA3_256.new
 
     expect(sha.hexdigest).to eq('a7ffc6f8bf1ed76651c14756a061d662f580ff4de43b49fa82d80a4b80f8434a')
     expect(sha.update(['cc'].pack('H*'))).to eq('677035391cd3701293d385f037ba32796252bb7ce180b00b582dd9b20aaad7f0')
@@ -129,8 +129,8 @@ RSpec.describe 'SHA3::Digest::SHAxyz' do
     expect(sha.block_length).to eq(136)
   end
 
-  it 'passes Digest.SHA384() usage test' do
-    sha = SHA3::Digest::SHA384.new
+  it 'passes Digest.SHA3_384() usage test' do
+    sha = SHA3::Digest::SHA3_384.new
 
     expect(sha.hexdigest).to eq('0c63a75b845e4f7d01107d852e4c2485c51a50aaaa94fc61995e71bbee983a2ac3713831264adb47fb6bd1e058d5f004')
 
@@ -144,8 +144,8 @@ RSpec.describe 'SHA3::Digest::SHAxyz' do
     expect(sha.block_length).to eq(104)
   end
 
-  it 'passes Digest.SHA512() usage test' do
-    sha = SHA3::Digest::SHA512.new
+  it 'passes Digest.SHA3_512() usage test' do
+    sha = SHA3::Digest::SHA3_512.new
 
     expect(sha.hexdigest).to eq('a69f73cca23a9ac5c8b567dc185a756e97c982164fe25859e0d1dcc1475c80a615b2123af1f5f94c11e3e9402c3ac558f500199d95b6d3e301758586281dcd26')
     expect(sha.update(['cc'].pack('H*'))).to eq('3939fcc8b57b63612542da31a834e5dcc36e2ee0f652ac72e02624fa2e5adeecc7dd6bb3580224b4d6138706fc6e80597b528051230b00621cc2b22999eaa205')
