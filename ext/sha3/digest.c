@@ -1,11 +1,17 @@
 /* Copyright (c) 2012 - 2013 Johanns Gregorian <io+sha3@jsani.com> */
 
 #include <string.h>
+#include <ruby.h>
+#include <ruby/encoding.h>
 
 #include "sha3.h"
+#include "digest.h"
 
 VALUE cSHA3Digest;
 VALUE eSHA3DigestError;
+
+// Forward declaration
+static void free_mdx(MDX* mdx);
 
 /*
  * == Notes
@@ -22,7 +28,9 @@ VALUE eSHA3DigestError;
  *
  */
 
-static void free_mdx(MDX* mdx) {
+// TypedData functions for MDX struct
+static void mdx_free(void* ptr) {
+    MDX* mdx = (MDX*)ptr;
     if (mdx) {
         if (mdx->state) {
             free(mdx->state);
@@ -30,6 +38,26 @@ static void free_mdx(MDX* mdx) {
         free(mdx);
     }
 }
+
+// Implementation of free_mdx that calls mdx_free
+static void free_mdx(MDX* mdx) {
+    mdx_free(mdx);
+}
+
+static size_t mdx_memsize(const void* ptr) {
+    const MDX* mdx = (const MDX*)ptr;
+    size_t size = sizeof(MDX);
+    if (mdx && mdx->state) {
+        size += sizeof(Keccak_HashInstance);
+    }
+    return size;
+}
+
+const rb_data_type_t mdx_type = {
+    "SHA3::Digest",
+    {NULL, mdx_free, mdx_memsize,},
+    NULL, NULL, RUBY_TYPED_FREE_IMMEDIATELY
+};
 
 static VALUE c_digest_alloc(VALUE klass) {
     MDX* mdx = (MDX*)malloc(sizeof(MDX));
@@ -39,11 +67,11 @@ static VALUE c_digest_alloc(VALUE klass) {
 
     mdx->state = (Keccak_HashInstance*)calloc(1, sizeof(Keccak_HashInstance));
     if (!mdx->state) {
-        free_mdx(mdx);
+        mdx_free(mdx);
         rb_raise(eSHA3DigestError, "failed to allocate state memory");
     }
 
-    VALUE obj = Data_Wrap_Struct(klass, 0, free_mdx, mdx);
+    VALUE obj = TypedData_Wrap_Struct(klass, &mdx_type, mdx);
     mdx->hashbitlen = 0;
 
     return obj;
@@ -74,7 +102,7 @@ static VALUE c_digest_init(int argc, VALUE* argv, VALUE self) {
     VALUE hlen, data;
 
     rb_scan_args(argc, argv, "02", &hlen, &data);
-    GETMDX(self, mdx);
+    get_mdx(self, &mdx);
 
     mdx->hashbitlen = NIL_P(hlen) ? 256 : get_hlen(hlen);
 
@@ -95,7 +123,7 @@ static VALUE c_digest_update(VALUE self, VALUE data) {
     BitLength dlen;
 
     StringValue(data);
-    GETMDX(self, mdx);
+    get_mdx(self, &mdx);
 
     // Check for empty data
     if (RSTRING_LEN(data) == 0) {
@@ -119,7 +147,7 @@ static VALUE c_digest_update(VALUE self, VALUE data) {
 // SHA3::Digest.reset() -> self
 static VALUE c_digest_reset(VALUE self) {
     MDX* mdx;
-    GETMDX(self, mdx);
+    get_mdx(self, &mdx);
 
     memset(mdx->state, 0, sizeof(Keccak_HashInstance));
 
@@ -168,8 +196,8 @@ static VALUE c_digest_copy(VALUE self, VALUE obj) {
         return self;
     }
 
-    GETMDX(self, mdx1);
-    SAFEGETMDX(obj, mdx2);
+    get_mdx(self, &mdx1);
+    safe_get_mdx(obj, &mdx2);
 
     memcpy(mdx1->state, mdx2->state, sizeof(Keccak_HashInstance));
     mdx1->hashbitlen = mdx2->hashbitlen;
@@ -184,7 +212,7 @@ static VALUE c_digest_copy(VALUE self, VALUE obj) {
 // SHA3::Digest.digest_length -> Integer
 static VALUE c_digest_length(VALUE self) {
     MDX* mdx;
-    GETMDX(self, mdx);
+    get_mdx(self, &mdx);
 
     return ULL2NUM(mdx->hashbitlen / 8);
 }
@@ -192,7 +220,7 @@ static VALUE c_digest_length(VALUE self) {
 // SHA3::Digest.block_length -> Integer
 static VALUE c_digest_block_length(VALUE self) {
     MDX* mdx;
-    GETMDX(self, mdx);
+    get_mdx(self, &mdx);
 
     return ULL2NUM(200 - (2 * (mdx->hashbitlen / 8)));
 }
@@ -209,7 +237,7 @@ static VALUE c_digest_finish(int argc, VALUE* argv, VALUE self) {
     int digest_bytes;
 
     rb_scan_args(argc, argv, "01", &str);
-    GETMDX(self, mdx);
+    get_mdx(self, &mdx);
 
     digest_bytes = mdx->hashbitlen / 8;
 
