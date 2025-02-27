@@ -1,4 +1,4 @@
-/* Copyright (c) 2012 - 2013 Johanns Gregorian <io+sha3@jsani.com> */
+/* Copyright (c) 2012 - 2025 Johanns Gregorian <io+sha3@jsg.io> */
 
 #ifndef _SHA3_H_
 #define _SHA3_H_
@@ -15,7 +15,7 @@ extern "C" {
 extern VALUE mSHA3;
 extern VALUE eSHA3Error;
 
-int get_hlen(VALUE);
+int get_hlen(VALUE, algorithm_type*);
 void Init_sha3_n(void);
 
 #ifdef __cplusplus
