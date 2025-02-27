@@ -46,8 +46,9 @@ $INCFLAGS << vpath_dirs_processed
 $srcs = ['sha3.c', 'digest.c']
 
 # Find and add all .c files from the filtered directories
-$srcs += vpath_dirs.flat_map { |dir| Dir.glob("#{dir}/*.c") }
-                   .map { |file| File.basename(file) }
-                   .uniq
+$srcs += vpath_dirs
+         .flat_map { |dir| Dir.glob("#{dir}/*.c") }
+         .map { |file| File.basename(file) }
+         .uniq
 
 create_makefile(extension_name)
