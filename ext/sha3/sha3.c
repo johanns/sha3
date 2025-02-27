@@ -69,7 +69,7 @@ int get_hlen(VALUE obj, algorithm_type* algorithm) {
     return 0;  // Never reached, but silences compiler warnings
 }
 
-void Init_sha3_n() {
+void Init_sha3_n(void) {
     mSHA3 = rb_define_module("SHA3");
     eSHA3Error = rb_define_class_under(mSHA3, "SHA3Error", rb_eStandardError);
 
