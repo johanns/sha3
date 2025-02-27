@@ -14,7 +14,7 @@ Gem::Specification.new do |spec|
 
   spec.homepage = 'https://github.com/johanns/sha3'
   spec.license = 'MIT'
-  spec.required_ruby_version = '>= 2.6.0'
+  spec.required_ruby_version = '>= 2.7.0'
 
   spec.metadata['changelog_uri'] = "#{spec.homepage}/CHANGELOG.md"
   spec.metadata['homepage_uri'] = spec.homepage
@@ -33,11 +33,6 @@ Gem::Specification.new do |spec|
   spec.extensions = ['ext/sha3/extconf.rb']
   spec.require_paths = ['lib']
 
-  # Uncomment to register a new dependency of your gem
-  # spec.add_dependency "example-gem", "~> 1.0"
-
-  # For more information and examples about making a new gem, check out our
-  # guide at: https://bundler.io/guides/creating_gem.html
   spec.metadata['rubygems_mfa_required'] = 'true'
 
   spec.cert_chain = ['certs/johanns.pem']
