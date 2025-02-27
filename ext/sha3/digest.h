@@ -3,6 +3,10 @@
 #ifndef _DIGEST_H_
 #define _DIGEST_H_
 
+#include <ruby.h>
+#include <ruby/encoding.h>
+#include <string.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif

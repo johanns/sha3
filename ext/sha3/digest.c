@@ -1,12 +1,8 @@
 /* Copyright (c) 2012 - 2013 Johanns Gregorian <io+sha3@jsani.com> */
 
-#include "digest.h"
-
-#include <ruby.h>
-#include <ruby/encoding.h>
-#include <string.h>
 
 #include "sha3.h"
+#include "digest.h"
 
 VALUE cSHA3Digest;
 VALUE eSHA3DigestError;
