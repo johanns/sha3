@@ -14,7 +14,7 @@ and related or neighboring rights to the source code in this file.
 http://creativecommons.org/publicdomain/zero/1.0/
 */
 
-#include "KeccakSponge.h"
+#include "KeccakDuplex.h"
 
 #ifdef KeccakReference
     #include "displayIntermediateValues.h"
@@ -27,10 +27,7 @@ http://creativecommons.org/publicdomain/zero/1.0/
     #define SnP KeccakP200
     #define SnP_width 200
     #define SnP_Permute KeccakP200_Permute_18rounds
-    #if defined(KeccakF200_FastLoop_supported)
-        #define SnP_FastLoop_Absorb KeccakF200_FastLoop_Absorb
-    #endif
-        #include "KeccakSponge.inc"
+        #include "KeccakDuplex.inc"
     #undef prefix
     #undef SnP
     #undef SnP_width
@@ -45,10 +42,7 @@ http://creativecommons.org/publicdomain/zero/1.0/
     #define SnP KeccakP400
     #define SnP_width 400
     #define SnP_Permute KeccakP400_Permute_20rounds
-    #if defined(KeccakF400_FastLoop_supported)
-        #define SnP_FastLoop_Absorb KeccakF400_FastLoop_Absorb
-    #endif
-        #include "KeccakSponge.inc"
+        #include "KeccakDuplex.inc"
     #undef prefix
     #undef SnP
     #undef SnP_width
@@ -63,10 +57,7 @@ http://creativecommons.org/publicdomain/zero/1.0/
     #define SnP KeccakP800
     #define SnP_width 800
     #define SnP_Permute KeccakP800_Permute_22rounds
-    #if defined(KeccakF800_FastLoop_supported)
-        #define SnP_FastLoop_Absorb KeccakF800_FastLoop_Absorb
-    #endif
-        #include "KeccakSponge.inc"
+        #include "KeccakDuplex.inc"
     #undef prefix
     #undef SnP
     #undef SnP_width
@@ -79,16 +70,11 @@ http://creativecommons.org/publicdomain/zero/1.0/
 
     #define prefix KeccakWidth1600
     #define SnP KeccakP1600
-    #define SnP_state KeccakP1600_state
     #define SnP_width 1600
     #define SnP_Permute KeccakP1600_Permute_24rounds
-    #if defined(KeccakF1600_FastLoop_supported)
-        #define SnP_FastLoop_Absorb KeccakF1600_FastLoop_Absorb
-    #endif
-        #include "KeccakSponge.inc"
+        #include "KeccakDuplex.inc"
     #undef prefix
     #undef SnP
-    #undef SnP_state
     #undef SnP_width
     #undef SnP_Permute
     #undef SnP_FastLoop_Absorb
