@@ -1,4 +1,4 @@
-# sha3  
+# sha3
 
 [![Gem Version](https://badge.fury.io/rb/sha3.svg)](https://badge.fury.io/rb/sha3) [![Ruby](https://github.com/johanns/sha3/actions/workflows/main.yml/badge.svg)](https://github.com/johanns/sha3/actions/workflows/main.yml)
 
@@ -110,7 +110,7 @@ Only a small subset of test vectors are included in the source repository; howev
 
 Supported Ruby versions:
 
-  - MRI Ruby 2.6 - 3.1
+  - MRI Ruby 2.7 - 3.1
 
 ## Credits
 
