@@ -3,48 +3,51 @@
 require 'mkmf'
 require 'rbconfig'
 
-# Maintaining XKCP lib directory structure to hopefully simplify 
-# future upgrades.
-
-keccak_base_files = [
-  'lib/high/Keccak/KeccakSponge.c',
-  'lib/high/Keccak/FIPS202/KeccakHash.c'
-]
-
-if 1.size == 8
-  Logging.message "=== Using 64-bit reference ===\n"
-
-  keccak_base_files << 'lib/low/KeccakP-1600/ref-64bits/KeccakP-1600-reference.c'
-else
-  Logging.message "=== Using 32-bit reference ===\n"
-
-  keccak_base_files << 'lib/low/KeccakP-1600/ref-32bits/KeccakP-1600-reference32BI.c'
-end
-
-FileUtils.cp keccak_base_files.map { |f| "#{$srcdir}/#{f}" }, $srcdir
-
+b64 = 8.size == 8
 extension_name = 'sha3_n'
+ref_dir = b64 ? 'ref-64bits' : 'ref-32bits'
+
 dir_config(extension_name)
 
-$INCFLAGS << [
-  ' -I$(src) ',
-  ' -I$(srcdir)lib/ ',
-  ' -I$(srcdir)/lib/common ',
-  ' -I$(srcdir)/lib/high/Keccak ',
-  ' -I$(srcdir)/lib/high/Keccak/FIPS202 ',
-  ' -I$(srcdir)/lib/low/KeccakP-1600/common ',
-  ' -I$(srcdir)/lib/low/KeccakP-1600/ref-32bits ',
-  ' -I$(srcdir)/lib/low/KeccakP-1600/ref-64bits '
-].join
+# Set compiler flags
+$CFLAGS << ' -fomit-frame-pointer -O3 -g0 -fms-extensions'
 
-$CFLAGS << ' -fomit-frame-pointer -O3 -g0 -fms-extensions '
-$CFLAGS << ' -march=native ' if enable_config('march-tune-native', false)
+# Add architecture-specific optimizations if enabled
+$CFLAGS << ' -march=native' if enable_config('march-tune-native', false)
 
-find_header('sha3.h')
-find_header('digest.h')
-find_header('align.h')
-find_header('brg_endian.h')
-find_header('KeccakSponge.h')
-find_header('KeccakHash.h')
+# Add security hardening flags
+$CFLAGS << ' -D_FORTIFY_SOURCE=2 -fstack-protector-strong'
 
-create_makefile extension_name
+# Add warning flags to catch potential issues
+$CFLAGS << ' -Wall -Wextra -Wformat -Wformat-security'
+
+# Add vectorization flags for better performance on supported platforms
+$CFLAGS << ' -ftree-vectorize' if RUBY_PLATFORM =~ /x86_64|amd64|arm64/
+
+# Find all relevant subdirectories and filter appropriately
+vpath_dirs = Dir.glob("#{$srcdir}/lib/**/*")
+                .select { |path| File.directory?(path) }
+                .select { |dir| !dir.include?('KeccakP-1600/ref-') || dir.include?(ref_dir) }
+
+# Process directory paths for both VPATH and INCFLAGS
+vpath_dirs_processed = vpath_dirs.map { |dir| dir.sub($srcdir, '') }
+
+# Add source directories to VPATH
+$VPATH << vpath_dirs_processed
+          .map { |dir| "$(srcdir)#{dir}" }
+          .join(File::PATH_SEPARATOR)
+
+# Add include flags
+$INCFLAGS << vpath_dirs_processed
+             .map { |dir| " -I$(srcdir)#{dir}" }
+             .join('')
+
+# Base source files
+$srcs = ['sha3.c', 'digest.c']
+
+# Find and add all .c files from the filtered directories
+$srcs += vpath_dirs.flat_map { |dir| Dir.glob("#{dir}/*.c") }
+                   .map { |file| File.basename(file) }
+                   .uniq
+
+create_makefile(extension_name)
