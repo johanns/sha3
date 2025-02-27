@@ -6,10 +6,10 @@
    Added static ID values so we initialize once and avoid repeated calls
    to rb_intern in get_hlen()
    ------------------------------------------------------------------------- */
-static ID sha224_id;
-static ID sha256_id;
-static ID sha384_id;
-static ID sha512_id;
+static ID sha3_224_id;
+static ID sha3_256_id;
+static ID sha3_384_id;
+static ID sha3_512_id;
 
 VALUE mSHA3;
 VALUE eSHA3Error;
@@ -18,19 +18,19 @@ int get_hlen(VALUE obj) {
   if (TYPE(obj) == T_SYMBOL) {
     ID symid = SYM2ID(obj);
 
-    if (symid == sha224_id) {
+    if (symid == sha3_224_id) {
       return 224;
-    } else if (symid == sha256_id) {
+    } else if (symid == sha3_256_id) {
       return 256;
-    } else if (symid == sha384_id) {
+    } else if (symid == sha3_384_id) {
       return 384;
-    } else if (symid == sha512_id) {
+    } else if (symid == sha3_512_id) {
       return 512;
     }
 
     rb_raise(eSHA3Error,
-             "invalid hash bit symbol (should be: :sha224, "
-             ":sha256, :sha384, or :sha512)");
+             "invalid hash bit symbol (should be: :sha3_224, "
+             ":sha3_256, :sha3_384, or :sha3_512)");
   } else if (TYPE(obj) == T_FIXNUM) {
     int hlen = NUM2INT(obj);
 
@@ -54,10 +54,10 @@ void Init_sha3_n() {
   eSHA3Error = rb_define_class_under(mSHA3, "SHA3Error", rb_eStandardError);
 
   /* Initialize static symbol IDs for faster lookup in get_hlen() */
-  sha224_id = rb_intern("sha224");
-  sha256_id = rb_intern("sha256");
-  sha384_id = rb_intern("sha384");
-  sha512_id = rb_intern("sha512");
+  sha3_224_id = rb_intern("sha3_224");
+  sha3_256_id = rb_intern("sha3_256");
+  sha3_384_id = rb_intern("sha3_384");
+  sha3_512_id = rb_intern("sha3_512");
 
   Init_sha3_n_digest();
 }
