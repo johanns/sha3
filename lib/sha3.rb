@@ -7,7 +7,7 @@ module SHA3
   class Digest
     # Based on 'OpenSSL for Ruby 2' project
     # Copyright (C) 2002 Michal Rokos <m.rokos@sh.cvut.cz>
-    alg = { sha224: 'SHA224', sha256: 'SHA256', sha384: 'SHA384', sha512: 'SHA512' }
+    alg = { sha3_224: 'SHA3_224', sha3_256: 'SHA3_256', sha3_384: 'SHA3_384', sha3_512: 'SHA3_512' }
 
     def self.digest(name, data)
       super(data, name)
