@@ -136,14 +136,27 @@ static int cmp_states(const MDX* mdx1, const MDX* mdx2) {
         return 0;
     }
 
-    // Then check all the state fields
-    return ((memcmp(&(mdx1->state->sponge.state), &(mdx2->state->sponge.state),
-                    sizeof(mdx1->state->sponge.state)) == 0) &&
-            (mdx1->state->sponge.rate == mdx2->state->sponge.rate) &&
-            (mdx1->state->sponge.byteIOIndex == mdx2->state->sponge.byteIOIndex) &&
-            (mdx1->state->sponge.squeezing == mdx2->state->sponge.squeezing) &&
-            (mdx1->state->fixedOutputLength == mdx2->state->fixedOutputLength) &&
-            (mdx1->state->delimitedSuffix == mdx2->state->delimitedSuffix));
+    // Compare the internal state structure
+    if (memcmp(&(mdx1->state->sponge.state), &(mdx2->state->sponge.state),
+               sizeof(mdx1->state->sponge.state)) != 0) {
+        return 0;
+    }
+
+    // Compare sponge parameters
+    if ((mdx1->state->sponge.rate != mdx2->state->sponge.rate) ||
+        (mdx1->state->sponge.byteIOIndex != mdx2->state->sponge.byteIOIndex) ||
+        (mdx1->state->sponge.squeezing != mdx2->state->sponge.squeezing)) {
+        return 0;
+    }
+
+    // Compare hash-specific parameters
+    if ((mdx1->state->fixedOutputLength != mdx2->state->fixedOutputLength) ||
+        (mdx1->state->delimitedSuffix != mdx2->state->delimitedSuffix)) {
+        return 0;
+    }
+
+    // All comparisons passed
+    return 1;
 }
 
 // SHA3::Digest.copy(obj) -> self
