@@ -7,9 +7,6 @@
 VALUE cSHA3Digest;
 VALUE eSHA3DigestError;
 
-// Forward declaration
-static void free_mdx(MDX* mdx);
-
 /*
  * == Notes
  *
@@ -34,11 +31,6 @@ static void mdx_free(void* ptr) {
         }
         free(mdx);
     }
-}
-
-// Implementation of free_mdx that calls mdx_free
-static void free_mdx(MDX* mdx) {
-    mdx_free(mdx);
 }
 
 static size_t mdx_memsize(const void* ptr) {
@@ -386,7 +378,7 @@ static VALUE c_digest_hexdigest(int argc, VALUE* argv, VALUE self) {
     return rb_call_super(argc, argv);
 }
 
-void Init_sha3_n_digest() {
+void Init_sha3_n_digest(void) {
     rb_require("digest");
 
     /* SHA3::Digest (class) */
