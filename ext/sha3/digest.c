@@ -137,7 +137,7 @@ static int cmp_states(const MDX* mdx1, const MDX* mdx2) {
     }
 
     // Then check all the state fields
-    return ((memcmp(mdx1->state->sponge.state, mdx2->state->sponge.state,
+    return ((memcmp(&(mdx1->state->sponge.state), &(mdx2->state->sponge.state),
                     sizeof(mdx1->state->sponge.state)) == 0) &&
             (mdx1->state->sponge.rate == mdx2->state->sponge.rate) &&
             (mdx1->state->sponge.byteIOIndex == mdx2->state->sponge.byteIOIndex) &&
