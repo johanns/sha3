@@ -20,7 +20,7 @@ BinPackArguments: true
 BinPackParameters: true
 BreakBeforeBraces: Attach
 BreakBeforeTernaryOperators: true
-ColumnLimit: 100
+ColumnLimit: 120
 CompactNamespaces: false
 ConstructorInitializerAllOnOneLineOrOnePerLine: true
 Cpp11BracedListStyle: true
