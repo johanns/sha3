@@ -1,4 +1,4 @@
-/* Copyright (c) 2012 - 2025 Johanns Gregorian <io+sha3@jsg.io> */
+// Copyright (c) 2012 - 2025 Johanns Gregorian <io+sha3@jsg.io>
 
 #ifndef _DIGEST_H_
 #define _DIGEST_H_
@@ -7,11 +7,15 @@
 #include <ruby/encoding.h>
 #include <string.h>
 
+#include "KeccakHash.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 typedef enum { SHA3_224 = 0, SHA3_256, SHA3_384, SHA3_512, SHAKE_128, SHAKE_256 } algorithm_type;
+
+typedef HashReturn (*keccak_init_func)(Keccak_HashInstance*);
 
 typedef struct {
     Keccak_HashInstance* state;
@@ -19,11 +23,20 @@ typedef struct {
     algorithm_type algorithm;
 } MDX;
 
+VALUE sha3_module;
+VALUE digest_class;
+VALUE digest_error_class;
+
+/* Static IDs for faster symbol lookup */
+static ID sha3_224_id;
+static ID sha3_256_id;
+static ID sha3_384_id;
+static ID sha3_512_id;
+static ID shake_128_id;
+static ID shake_256_id;
+
 // TypedData functions
 extern const rb_data_type_t mdx_type;
-
-extern VALUE cSHA3Digest;
-extern VALUE eSHA3DigestError;
 
 // Static inline functions replacing macros
 static inline void get_mdx(VALUE obj, MDX** mdx) {
@@ -34,14 +47,35 @@ static inline void get_mdx(VALUE obj, MDX** mdx) {
 }
 
 static inline void safe_get_mdx(VALUE obj, MDX** mdx) {
-    if (!rb_obj_is_kind_of(obj, cSHA3Digest)) {
+    if (!rb_obj_is_kind_of(obj, digest_class)) {
         rb_raise(rb_eTypeError, "wrong argument (%s)! (expected %s)", rb_obj_classname(obj),
-                 rb_class2name(cSHA3Digest));
+                 rb_class2name(digest_class));
     }
     get_mdx(obj, mdx);
 }
 
-void Init_sha3_n_digest(void);
+/* Allocation and initialization */
+static VALUE rb_digest_alloc(VALUE);
+static VALUE rb_digest_init(int, VALUE*, VALUE);
+
+/* Core digest operations */
+static VALUE rb_digest_copy(VALUE, VALUE);
+static VALUE rb_digest_finish(int, VALUE*, VALUE);
+static VALUE rb_digest_reset(VALUE);
+static VALUE rb_digest_update(VALUE, VALUE);
+
+/* Digest properties */
+static VALUE rb_digest_block_length(VALUE);
+static VALUE rb_digest_length(VALUE);
+static VALUE rb_digest_name(VALUE);
+
+/* Output methods */
+static VALUE rb_digest_digest(int, VALUE*, VALUE);
+static VALUE rb_digest_hexdigest(int, VALUE*, VALUE);
+static VALUE rb_digest_hex_squeeze(VALUE, VALUE);
+static VALUE rb_digest_squeeze(VALUE, VALUE);
+static VALUE rb_digest_self_digest(VALUE, VALUE, VALUE);
+static VALUE rb_digest_self_hexdigest(VALUE, VALUE, VALUE);
 
 #ifdef __cplusplus
 }
