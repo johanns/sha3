@@ -7,7 +7,7 @@ A high-performance native binding to the SHA3 (FIPS 202) cryptographic hashing a
 > [!CAUTION]
 > **Security Notice**: Do not use SHA-3 for hashing passwords. Instead, use a slow hashing function such as PBKDF2, Argon2, bcrypt, or scrypt.
 
-> [!NOTICE]
+> [!IMPORTANT]
 > **Breaking Changes**: SHA3 version 2.0 introduces breaking changes to the API. Please review the changelog and ensure compatibility with your application.
 > If you need the previous behavior, lock your Gemfile to version '~> 1.0'.
 
@@ -114,9 +114,9 @@ result = shake.hex_squeeze(120)
 binary_result = shake.squeeze(1024)
 
 # You can call squeeze functions multiple times with arbitrary output lengths
-first_part = shake.squeeze(32)       # Get first 32 bytes
-second_part = shake.squeeze(64)      # Get next 64 bytes
-third_part = shake.hex_squeeze(128)  # Get next 128 bytes as hex
+first_part = shake.squeeze(32)       # Get 32 bytes
+second_part = shake.squeeze(64)      # Get 64 bytes
+third_part = shake.hex_squeeze(128)  # Get 128 bytes as hex
 ```
 
 ### Alternate Class Syntax
