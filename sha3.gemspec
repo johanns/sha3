@@ -16,7 +16,6 @@ Gem::Specification.new do |spec|
 
   spec.metadata['changelog_uri'] = "#{spec.homepage}/CHANGELOG.md"
   spec.metadata['homepage_uri'] = spec.homepage
-  spec.metadata['source_code_uri'] = spec.homepage
   spec.metadata['documentation_uri'] = 'https://docs.jsg.io/sha3/html/index.html'
 
   spec.post_install_message = <<-MSG
@@ -34,7 +33,7 @@ Gem::Specification.new do |spec|
   spec.extensions = ['ext/sha3/extconf.rb']
   spec.metadata['rubygems_mfa_required'] = 'true'
 
-  spec.cert_chain = ['certs/johanns.pem']
+  spec.cert_chain = ['certs/io+sha3@jsg.io.pem']
   spec.signing_key = File.expand_path('~/.ssh/gem-private_key.pem') if $PROGRAM_NAME =~ /gem\z/
 
   spec.add_dependency('rdoc', '~> 6.12')
