@@ -212,8 +212,8 @@ build-iPhoneSimulator/
 
 ## Documentation cache and generated files:
 /.yardoc/
+/yard_doc/
 /_yardoc/
-/doc/
 /rdoc/
 
 ## Environment normalization:
@@ -253,3 +253,7 @@ Gemfile.lock
 .ionide
 
 # End of https://www.toptal.com/developers/gitignore/api/c,ruby,macos,clion+all,visualstudiocode
+
+*.bundle
+spec/data
+.rspec_status

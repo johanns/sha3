@@ -5,6 +5,8 @@ source 'https://rubygems.org'
 gemspec
 
 group :development, :test do
+  gem 'irb'
+
   gem 'rake', '~> 13'
   gem 'rake-compiler', '~> 1'
   gem 'rspec', '~> 3'

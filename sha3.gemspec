@@ -1,10 +1,8 @@
 # frozen_string_literal: true
 
-require_relative 'lib/sha3/version'
-
 Gem::Specification.new do |spec|
   spec.name = 'sha3'
-  spec.version = SHA3::VERSION
+  spec.version = '2.0.0'
 
   spec.authors = ['Johanns Gregorian']
   spec.email = ['io+sha3@jsg.io']
@@ -19,22 +17,25 @@ Gem::Specification.new do |spec|
   spec.metadata['changelog_uri'] = "#{spec.homepage}/CHANGELOG.md"
   spec.metadata['homepage_uri'] = spec.homepage
   spec.metadata['source_code_uri'] = spec.homepage
+  spec.metadata['documentation_uri'] = 'https://docs.jsg.io/sha3/html/index.html'
 
-  # Specify which files should be added to the gem when it is released.
-  # The `git ls-files -z` loads the files in the RubyGem that have been added into git.
+  spec.post_install_message = <<-MSG
+    [NOTICE] SHA3 version 2.0 introduces breaking changes to the API.
+    Please review the changelog and ensure compatibility with your application.
+    If you need the previous behavior, lock your Gemfile to version '~> 1.0'."
+  MSG
+
   spec.files = Dir.chdir(File.expand_path(__dir__)) do
     `git ls-files -z`.split("\x0").reject do |f|
-      (f == __FILE__) || f.match(%r{\A(?:(?:bin|test|spec|features)/|\.(?:git|travis|circleci)|appveyor)})
+      (f == __FILE__) || f.match(%r{\A(?:(?:bin|test|spec|features)/|\.(?:git))})
     end
   end
 
-  spec.bindir = 'exe'
-  spec.executables = spec.files.grep(%r{\Aexe/}) { |f| File.basename(f) }
   spec.extensions = ['ext/sha3/extconf.rb']
-  spec.require_paths = ['lib']
-
   spec.metadata['rubygems_mfa_required'] = 'true'
 
   spec.cert_chain = ['certs/johanns.pem']
   spec.signing_key = File.expand_path('~/.ssh/gem-private_key.pem') if $PROGRAM_NAME =~ /gem\z/
+
+  spec.add_dependency('rdoc', '~> 6.12')
 end
