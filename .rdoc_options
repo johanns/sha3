@@ -1,0 +1,10 @@
+---
+main_page: README.md
+title: SHA3
+
+charset: UTF-8
+encoding: UTF-8
+force_update: true
+markup: rdoc
+op_dir: html
+visibility: :private

@@ -1,123 +1,210 @@
-# sha3
+# SHA3 for Ruby
 
 [![Gem Version](https://badge.fury.io/rb/sha3.svg)](https://badge.fury.io/rb/sha3) [![Ruby](https://github.com/johanns/sha3/actions/workflows/main.yml/badge.svg)](https://github.com/johanns/sha3/actions/workflows/main.yml)
 
-**SHA3 for Ruby** is a XKCP based native (C) binding to SHA3 (FIPS 202) cryptographic hashing algorithm.
+A high-performance native binding to the SHA3 (FIPS 202) cryptographic hashing algorithm, based on the [XKCP - eXtended Keccak Code Package](https://github.com/XKCP/XKCP).
 
-- [Home](https://github.com/johanns/sha3#readme)
-- [Issues](https://github.com/johanns/sha3/issues)
-- [Documentation](http://rubydoc.info/gems/sha3/frames)
-- [XKCP - eXtended Keccak Code Package](https://github.com/XKCP/XKCP)
+> [!CAUTION]
+> **Security Notice**: Do not use SHA-3 for hashing passwords. Instead, use a slow hashing function such as PBKDF2, Argon2, bcrypt, or scrypt.
 
-## Warning
+> [!NOTICE]
+> **Breaking Changes**: SHA3 version 2.0 introduces breaking changes to the API. Please review the changelog and ensure compatibility with your application.
+> If you need the previous behavior, lock your Gemfile to version '~> 1.0'.
 
-- Please do NOT use SHA3 to hash passwords -- use a slow hashing function instead (e.g.: `pbkdf2`, `argon2`, `bcrypt` or `scrypt`)
-- Version 1.0 introduces new API and is incompatible with previous versions (0.x).
+## Table of Contents
 
-## Module details
+- [Documentation](#documentation)
+- [Features](#features)
+- [Installation](#installation)
+- [Usage](#usage)
+  - [SHA-3 Fixed Hash Functions](#sha-3-fixed-hash-functions)
+  - [SHAKE128/256 Functions](#shake128256-functions)
+  - [Alternate Class Syntax](#alternate-class-syntax)
+  - [Hashing a File](#hashing-a-file)
+- [Development](#development)
+  - [Dependencies](#dependencies)
+  - [Testing](#testing)
+  - [Supported Ruby Versions](#supported-ruby-versions)
+- [Contributing](#contributing)
+- [Roadmap](#roadmap)
+- [License](#license)
+- [Credits](#credits)
 
-**SHA3::Digest**: A standard *Digest* _subclass_. The interface, and operation of this class are parallel to digest classes bundled with MRI-based Rubies (e.g.: **Digest::SHA2**, and **OpenSSL::Digest**).
+## Documentation
 
-See [documentation for Ruby's **Digest** class for additional details](http://www.ruby-doc.org/stdlib-2.2.3/libdoc/digest/rdoc/Digest.html).
+- [API Documentation](https://docs.jsg.io/sha3/html/index.html)
+- [GitHub Repository](https://github.com/johanns/sha3#readme)
+- [Issue Tracker](https://github.com/johanns/sha3/issues)
+
+## Features
+
+- Full support for all SHA-3 variants (224, 256, 384, and 512 bit)
+- Support for SHAKE128 and SHAKE256 extendable-output functions (XOFs)
+- Native C implementation for high performance
+- Simple, Ruby-friendly API that follows Ruby's standard Digest interface
+- Comprehensive test suite with official NIST test vectors
+- Thread-safe implementation
 
 ## Installation
 
-```shell
+Add this line to your application's Gemfile:
+
+```ruby
+gem 'sha3', '~> 2.0'
+```
+
+And then execute:
+
+```sh
+bundle install
+```
+
+Or install it yourself as:
+
+```sh
 gem install sha3
 ```
 
 ## Usage
 
+### SHA-3 Fixed Hash Functions
+
 ```ruby
 require 'sha3'
+
+# Create a new digest instance
+digest = SHA3::Digest.new(:sha3_224, 'Start here')
+
+# Add more data to be hashed
+digest << "Compute Me"
+digest.update("Me too")
+
+# Get the final hash value as a hex string
+digest.hexdigest
+# => "d6d38021d60857..."
+
+# Or as a binary string
+digest.digest
 ```
 
-Valid hash bit-lengths are: *224*, *256*, *384*, *512*.
+Valid algorithm symbols are:
+
+- `:sha3_224` - SHA-3 224 bits
+- `:sha3_256` - SHA-3 256 bits
+- `:sha3_384` - SHA-3 384 bits
+- `:sha3_512` - SHA-3 512 bits
+- `:shake_128` - SHAKE128 extendable-output function
+- `:shake_256` - SHAKE256 extendable-output function
+
+### SHAKE128/256 Functions
+
+SHAKE128 and SHAKE256 are extendable-output functions (XOFs) that allow you to "squeeze" an arbitrary number of bytes from the hash state:
 
 ```ruby
-:sha224  :sha256  :sha384  :sha512
+# Create a new SHAKE128 instance
+shake = SHA3::Digest.new(:shake_128)
 
-# SHA3::Digest.new(224) is SHA3::Digest.new(:sha224)
+# Add data to be hashed
+shake << 'Squeeze this data...'
+
+# Squeeze 120 bytes (240 hex characters) from the hash state
+result = shake.hex_squeeze(120)
+
+# Or get binary output
+binary_result = shake.squeeze(1024)
+
+# You can call squeeze functions multiple times with arbitrary output lengths
+first_part = shake.squeeze(32)       # Get first 32 bytes
+second_part = shake.squeeze(64)      # Get next 64 bytes
+third_part = shake.hex_squeeze(128)  # Get next 128 bytes as hex
 ```
 
-Alternatively, you can instantiate using one of four sub-classes:
+### Alternate Class Syntax
+
+For convenience, you can also use dedicated classes for each algorithm:
 
 ```ruby
-SHA3::Digest::SHA224.new() # 224 bits
-SHA3::Digest::SHA256.new() # 256 bits
-SHA3::Digest::SHA384.new() # 384 bits
-SHA3::Digest::SHA512.new() # 512 bits
+# Available classes
+SHA3::Digest::SHA3_224.new([data])
+SHA3::Digest::SHA3_256.new([data])
+SHA3::Digest::SHA3_384.new([data])
+SHA3::Digest::SHA3_512.new([data])
+SHA3::Digest::SHAKE_128.new([data])
+SHA3::Digest::SHAKE_256.new([data])
 ```
 
-### Basics
-
 ```ruby
-# Instantiate a new SHA3::Digest class with 256 bit length
-s = SHA3::Digest.new(:sha256)
+# Example usage
+digest = SHA3::Digest::SHA3_256.new('Start here')
 
-# OR #
+digest << "Compute Me"
+digest.update("Me too")
 
-s = SHA3::Digest::SHA256.new()
-
-# Update hash state, and compute new value
-s.update "Compute Me"
-
-# << is an .update() alias
-s << "Me too"
-
-# Returns digest value in bytes
-s.digest
-# => "\xBE\xDF\r\xD9\xA1..."
-
-# Returns digest value as hex string
-s.hexdigest
+digest.hexdigest
 # => "bedf0dd9a15b647..."
-
-### Digest class-methods: ###
-
-SHA3::Digest.hexdigest(:sha224, "Hash me, please")
-# => "200e7bc18cd613..."
-
-SHA3::Digest::SHA384.digest("Hash me, please")
-# => "\xF5\xCEpC\xB0eV..."
 ```
 
-### Hashing a file
+### Hashing a File
 
 ```ruby
-# Compute the hash value for given file, and return the result as hex
-s = SHA3::Digest::SHA224.file("my_fantastical_file.bin").hexdigest
+# Compute the hash value for a given file, and return the result as hex
+hash = SHA3::Digest::SHA3_256.file("my_file.bin").hexdigest
 
-# Calling SHA3::Digest.file(...) defaults to SHA256
-s = SHA3::Digest.file("tests.sh")
-# => #<SHA3::Digest: a9801db49389339...>
+# Calling SHA3::Digest.file(...) defaults to SHA3_256
+hash = SHA3::Digest.file("my_file.bin").hexdigest
+# => "a9801db49389339..."
 ```
 
-### Development Dependencies
+## Development
 
-* Native build tools (e.g., Clang/LLVM, GCC, Minigw, etc.)
-* Gems: rubygems-tasks, rake, rspec, yard
+### Dependencies
+
+- **C/C++** compiler and native build tools (e.g., Clang/LLVM, GCC, MinGW, etc.)
+- **Gems**: rake, rake-compiler, rspec, yard
 
 ### Testing
 
-Call ```rake``` to run the included RSpec tests.
+Run `rake` to build and run the (RSpec) tests.
 
-Only a small subset of test vectors are included in the source repository; however, the complete test vectors suite is available for download. Simply run the ```tests.sh``` shell script (available in the root of source directory) to generate full byte-length RSpec test files.
+To run the tests manually:
 
-  ```sh tests.sh```
+```bash
+bundle exec rspec
+```
 
-### Rubies
+The test suite includes a special `sha3_vectors_spec.rb` file that automatically:
+1. Downloads the official SHA3 test vectors from the XKCP repository
+2. Parses the test vectors
+3. Runs tests against all SHA3 variants (224, 256, 384, and 512 bit)
 
-Supported Ruby versions:
+The test vectors are downloaded only once and cached in the `spec/data` directory for future test runs.
 
-  - MRI Ruby 2.7 - 3.1
+### Supported Ruby Versions
+
+- MRI Ruby 2.7 - 3.1
+
+## Roadmap
+
+- [X] Add support for SHA-3 variants (224, 256, 384, and 512 bit)
+- [X] Add support for SHAKE128 and SHAKE256 extendable-output functions (XOFs)
+- [ ] Add support for cSHAKE, TurboSHANKE, and KMAC
+
+## Contributing
+
+1. Fork it
+2. Create your feature branch (`git checkout -b my-new-feature`)
+3. Commit your changes (`git commit -am 'Add some feature'`)
+4. Push to the branch (`git push origin my-new-feature`)
+5. Create new Pull Request
+
+## License
+
+Copyright (c) 2012 - 2025 Johanns Gregorian (https://github.com/johanns)
+
+Released under the MIT License. See [LICENSE.txt](LICENSE.txt) for details.
 
 ## Credits
 
-XKCP by Keccak team: [https://keccak.team/index.html]()
+- [XKCP - eXtended Keccak Code Package](https://github.com/XKCP/XKCP) by the Keccak team: [https://keccak.team/index.html](https://keccak.team/index.html)
+- All contributors to the SHA3 for Ruby project
 
-## Copyright
-
-Copyright (c) 2012 - 2022 Johanns Gregorian (https://github.com/johanns)
-
-**See LICENSE.txt for details.**

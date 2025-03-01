@@ -1,1 +1,0 @@
-lib/**/doc.rb lib/**/version.rb --markup rdoc --title "sha3 Documentation" --protected

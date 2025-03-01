@@ -1,4 +1,5 @@
--
-README.rdoc
-ChangeLog.rdoc
+README.md
 LICENSE.txt
+lib/**/*.rb
+ext/sha3/digest.{c,h}
+doc/**/*.rb
