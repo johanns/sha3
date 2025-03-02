@@ -4,7 +4,7 @@ require 'mkmf'
 require 'rbconfig'
 
 b64 = 8.size == 8
-extension_name = 'sha3_digest'
+extension_name = 'sha3_ext'
 ref_dir = b64 ? 'ref-64bits' : 'ref-32bits'
 
 dir_config(extension_name)
@@ -43,7 +43,7 @@ $INCFLAGS << vpath_dirs_processed
              .join('')
 
 # Base source files
-$srcs = ['digest.c']
+$srcs = ['digest.c', 'sha3.c']
 
 # Find and add all .c files from the filtered directories
 $srcs += vpath_dirs

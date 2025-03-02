@@ -1,5 +1,8 @@
 #include "digest.h"
 
+#include "KeccakHash.h"
+#include "sha3.h"
+
 /*
  * == Notes
  *
@@ -15,6 +18,78 @@
  *
  */
 
+/*** Types and structs  ***/
+
+typedef enum { SHA3_224 = 0, SHA3_256, SHA3_384, SHA3_512, SHAKE_128, SHAKE_256 } sha3_digest_algorithms;
+
+typedef struct {
+    Keccak_HashInstance* state;
+    int hashbitlen;
+    sha3_digest_algorithms algorithm;
+} sha3_digest_context_t;
+
+typedef HashReturn (*keccak_init_func)(Keccak_HashInstance*);
+
+/*** Function prototypes ***/
+
+static inline void get_sha3_digest_context(VALUE, sha3_digest_context_t**);
+static inline void safe_get_sha3_digest_context(VALUE, sha3_digest_context_t**);
+
+static int get_hashbit_length(VALUE, sha3_digest_algorithms*);
+static HashReturn keccak_hash_initialize(sha3_digest_context_t*);
+
+static void sha3_digest_free_context(void*);
+static size_t sha3_digest_context_size(const void*);
+
+static VALUE rb_sha3_kmac_alloc(VALUE);
+
+/* Allocation and initialization */
+static VALUE rb_sha3_digest_alloc(VALUE);
+static VALUE rb_sha3_digest_init(int, VALUE*, VALUE);
+
+/* Core digest operations */
+static VALUE rb_sha3_digest_copy(VALUE, VALUE);
+static VALUE rb_sha3_digest_finish(int, VALUE*, VALUE);
+static VALUE rb_sha3_digest_reset(VALUE);
+static VALUE rb_sha3_digest_update(VALUE, VALUE);
+
+/* Digest properties */
+static VALUE rb_sha3_digest_block_length(VALUE);
+static VALUE rb_sha3_digest_length(VALUE);
+static VALUE rb_sha3_digest_name(VALUE);
+
+/* Output methods */
+static VALUE rb_sha3_digest_digest(int, VALUE*, VALUE);
+static VALUE rb_sha3_digest_hexdigest(int, VALUE*, VALUE);
+static VALUE rb_sha3_digest_hex_squeeze(VALUE, VALUE);
+static VALUE rb_sha3_digest_squeeze(VALUE, VALUE);
+static VALUE rb_sha3_digest_self_digest(VALUE, VALUE, VALUE);
+static VALUE rb_sha3_digest_self_hexdigest(VALUE, VALUE, VALUE);
+
+/*** Globals variables  ***/
+
+VALUE _sha3_digest_class;
+VALUE _sha3_digest_error_class;
+
+/* Define the ID variables */
+static ID _sha3_224_id;
+static ID _sha3_256_id;
+static ID _sha3_384_id;
+static ID _sha3_512_id;
+static ID _shake_128_id;
+static ID _shake_256_id;
+
+/* TypedData structure for sha3_digest_context_t */
+const rb_data_type_t sha3_digest_data_type_t = {"SHA3::Digest",
+                                                {
+                                                    NULL,
+                                                    sha3_digest_free_context,
+                                                    sha3_digest_context_size,
+                                                },
+                                                NULL,
+                                                NULL,
+                                                RUBY_TYPED_FREE_IMMEDIATELY};
+
 /*
  * SHA3 module
  */
@@ -29,30 +104,29 @@ void Init_sha3_digest(void) {
     _shake_128_id = rb_intern("shake_128");
     _shake_256_id = rb_intern("shake_256");
 
-    /*
-     * Document-module: SHA3
-     *
-     * This hosts the SHA3::Digest classes.
-     */
-    VALUE sha3_module = rb_define_module("SHA3");
+    if (NIL_P(_sha3_module)) {
+        // This is both a safeguard and a workaround for RDoc
+        _sha3_module = rb_define_module("SHA3");
+    }
 
     /*
      * Document-class: SHA3::Digest
      *
      * It is a subclass of the Digest::Class class, which provides a framework for
-     * creating and manipulating hash digests.
+     * creating and manipulating hash digest. Supported Algorithms are:
+     * - SHA3-224
+     * - SHA3-256
+     * - SHA3-384
+     * - SHA3-512
+     * - SHAKE128
+     * - SHAKE256
      */
-    _sha3_digest_class = rb_define_class_under(sha3_module, "Digest", rb_path2class("Digest::Class"));
-
-    /*
-     * Default-const: SHA3::VERSION
-     *
-     * It is the version of the SHA3 module.
-     */
-    rb_define_const(sha3_module, "VERSION", rb_str_new2("2.0.0"));
+    _sha3_digest_class = rb_define_class_under(_sha3_module, "Digest", rb_path2class("Digest::Class"));
 
     /*
      * Document-class: SHA3::Digest::DigestError
+     *
+     * All SHA3::Digest methods raise this exception on error.
      *
      * It is a subclass of the StandardError class -- see the Ruby documentation
      * for more information.
@@ -79,7 +153,23 @@ void Init_sha3_digest(void) {
     rb_define_alias(_sha3_digest_class, "<<", "update");
 }
 
-int get_hlen(VALUE obj, sha3_digest_algorithms* algorithm) {
+// Static inline functions replacing macros
+static inline void get_sha3_digest_context(VALUE obj, sha3_digest_context_t** context) {
+    TypedData_Get_Struct((obj), sha3_digest_context_t, &sha3_digest_data_type_t, (*context));
+    if (!(*context)) {
+        rb_raise(rb_eRuntimeError, "Digest data not initialized!");
+    }
+}
+
+static inline void safe_get_sha3_digest_context(VALUE obj, sha3_digest_context_t** context) {
+    if (!rb_obj_is_kind_of(obj, _sha3_digest_class)) {
+        rb_raise(rb_eTypeError, "wrong argument (%s)! (expected %s)", rb_obj_classname(obj),
+                 rb_class2name(_sha3_digest_class));
+    }
+    get_sha3_digest_context(obj, context);
+}
+
+int get_hashbit_length(VALUE obj, sha3_digest_algorithms* algorithm) {
     if (TYPE(obj) == T_SYMBOL) {
         ID symid = SYM2ID(obj);
 
@@ -133,16 +223,24 @@ static size_t sha3_digest_context_size(const void* ptr) {
     return size;
 }
 
-/* TypedData structure for sha3_digest_context_t */
-const rb_data_type_t sha3_digest_data_type_t = {"SHA3::Digest",
-                                                {
-                                                    NULL,
-                                                    sha3_digest_free_context,
-                                                    sha3_digest_context_size,
-                                                },
-                                                NULL,
-                                                NULL,
-                                                RUBY_TYPED_FREE_IMMEDIATELY};
+static HashReturn keccak_hash_initialize(sha3_digest_context_t* context) {
+    switch (context->algorithm) {
+        case SHA3_224:
+            return Keccak_HashInitialize_SHA3_224(context->state);
+        case SHA3_256:
+            return Keccak_HashInitialize_SHA3_256(context->state);
+        case SHA3_384:
+            return Keccak_HashInitialize_SHA3_384(context->state);
+        case SHA3_512:
+            return Keccak_HashInitialize_SHA3_512(context->state);
+        case SHAKE_128:
+            return Keccak_HashInitialize_SHAKE128(context->state);
+        case SHAKE_256:
+            return Keccak_HashInitialize_SHAKE256(context->state);
+    }
+
+    return KECCAK_FAIL;
+}
 
 static VALUE rb_sha3_digest_alloc(VALUE klass) {
     sha3_digest_context_t* context = (sha3_digest_context_t*)malloc(sizeof(sha3_digest_context_t));
@@ -161,25 +259,6 @@ static VALUE rb_sha3_digest_alloc(VALUE klass) {
     context->algorithm = SHA3_256;  // Default algorithm
 
     return obj;
-}
-
-HashReturn keccak_hash_initialize(sha3_digest_context_t* context) {
-    switch (context->algorithm) {
-        case SHA3_224:
-            return Keccak_HashInitialize_SHA3_224(context->state);
-        case SHA3_256:
-            return Keccak_HashInitialize_SHA3_256(context->state);
-        case SHA3_384:
-            return Keccak_HashInitialize_SHA3_384(context->state);
-        case SHA3_512:
-            return Keccak_HashInitialize_SHA3_512(context->state);
-        case SHAKE_128:
-            return Keccak_HashInitialize_SHAKE128(context->state);
-        case SHAKE_256:
-            return Keccak_HashInitialize_SHAKE256(context->state);
-    }
-
-    return KECCAK_FAIL;
 }
 
 /*
@@ -217,7 +296,7 @@ static VALUE rb_sha3_digest_init(int argc, VALUE* argv, VALUE self) {
         context->algorithm = SHA3_256;
         context->hashbitlen = 256;
     } else {
-        context->hashbitlen = get_hlen(hlen, &context->algorithm);
+        context->hashbitlen = get_hashbit_length(hlen, &context->algorithm);
     }
 
     if (keccak_hash_initialize(context) != KECCAK_SUCCESS) {

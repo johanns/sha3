@@ -12,10 +12,11 @@ require 'rake/extensiontask'
 
 begin
   Rake::ExtensionTask.new :compile do |ext|
-    ext.name = 'sha3_digest'
+    ext.name = 'sha3_ext'
+
     ext.ext_dir = 'ext/sha3'
-    ext.tmp_dir = 'tmp'
     ext.source_pattern = '*.{c}'
+    ext.tmp_dir = 'tmp'
   end
 rescue LoadError
   task :compile do
