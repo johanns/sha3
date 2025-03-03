@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
+require 'constants'
+
 module SHA3
   require 'sha3_ext'
-
-  VERSION = "2.0.0"
 
   alg = {
     sha3_224: 'SHA3_224',

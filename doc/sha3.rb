@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module SHA3
   module Digest
     # SHA3_224 is a cryptographic hash function that produces a 224-bit (28-byte) hash value.
