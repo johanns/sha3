@@ -1,7 +1,8 @@
 #ifndef _SHA3_H_
 #define _SHA3_H_
 
-#include "digest.h"
+#include <ruby.h>
+#include <ruby/encoding.h>
 
 #ifdef __cplusplus
 extern "C" {

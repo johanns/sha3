@@ -1,5 +1,8 @@
 #include "sha3.h"
 
+#include "digest.h"
+#include "kmac.h"
+
 VALUE _sha3_module;
 
 void Init_sha3_ext(void) {
@@ -22,6 +25,7 @@ void Init_sha3_ext(void) {
     _sha3_module = rb_define_module("SHA3");
 
     Init_sha3_digest();
+    Init_sha3_kmac();
 
     return;
 }
