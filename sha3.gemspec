@@ -1,14 +1,20 @@
 # frozen_string_literal: true
 
+require_relative 'lib/constants'
+
 Gem::Specification.new do |spec|
   spec.name = 'sha3'
-  spec.version = '2.0.0'
+  spec.version = SHA3::VERSION
 
   spec.authors = ['Johanns Gregorian']
   spec.email = ['io+sha3@jsg.io']
 
-  spec.description = 'A XKCP based native (C) binding to SHA3 (FIPS 202) cryptographic hashing algorithm.'
-  spec.summary = 'SHA3 (FIPS 202) cryptographic hashing algorithm'
+  spec.description = <<~EOF
+    A high-performance native binding to the SHA3 (FIPS 202) cryptographic hashing algorithms, based on the XKCP - eXtended Keccak Code Package.
+    This gem provides support for the standard SHA-3 fixed-length functions (224, 256, 384, and 512 bits),
+    as well as the SHAKE128/SHAKE256 extendable-output functions (XOFs) and KMAC (Keccak Message Authentication Code) as specified in NIST SP 800-185.'
+  EOF
+  spec.summary = 'SHA3 (FIPS 202) cryptographic hashing algorithms: SHA3-224/256/384/512, SHAKE128/256, and KMAC'
 
   spec.homepage = 'https://github.com/johanns/sha3'
   spec.license = 'MIT'
@@ -16,13 +22,13 @@ Gem::Specification.new do |spec|
 
   spec.metadata['changelog_uri'] = "#{spec.homepage}/CHANGELOG.md"
   spec.metadata['homepage_uri'] = spec.homepage
-  spec.metadata['documentation_uri'] = 'https://docs.jsg.io/sha3/html/index.html'
+  spec.metadata['documentation_uri'] = 'https://docs.jsg.io/sha3/index.html'
 
-  spec.post_install_message = <<-MSG
+  spec.post_install_message = <<-EOF
     [NOTICE] SHA3 version 2.0 introduces breaking changes to the API.
     Please review the changelog and ensure compatibility with your application.
     If you need the previous behavior, lock your Gemfile to version '~> 1.0'."
-  MSG
+  EOF
 
   spec.files = Dir.chdir(File.expand_path(__dir__)) do
     `git ls-files -z`.split("\x0").reject do |f|
@@ -35,6 +41,4 @@ Gem::Specification.new do |spec|
 
   spec.cert_chain = ['certs/io+sha3@jsg.io.pem']
   spec.signing_key = File.expand_path('~/.ssh/gem-private_key.pem') if $PROGRAM_NAME =~ /gem\z/
-
-  spec.add_dependency('rdoc', '~> 6.12')
 end
