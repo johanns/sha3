@@ -6,6 +6,7 @@ gemspec
 
 group :development, :test do
   gem 'irb'
+  gem 'rdoc', '~> 6'
 
   gem 'rake', '~> 13'
   gem 'rake-compiler', '~> 1'

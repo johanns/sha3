@@ -1,5 +1,4 @@
 README.md
 LICENSE.txt
-lib/**/*.rb
-ext/sha3/digest.{c,h}
 doc/**/*.rb
+ext/sha3/*.c

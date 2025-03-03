@@ -29,6 +29,7 @@ require 'rdoc/task'
 RDoc::Task.new do |rdoc|
   rdoc.rdoc_dir = '../docs/sha3'
   rdoc.options << '--force-update'
+  rdoc.options << '-V'
 end
 
 task default: %i[compile spec]
