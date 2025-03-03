@@ -6,8 +6,6 @@
 #include <ruby.h>
 #include <ruby/encoding.h>
 
-#include "KeccakHash.h"
-
 #ifdef __cplusplus
 extern "C" {
 #endif

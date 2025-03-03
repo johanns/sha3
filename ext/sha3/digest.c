@@ -10,8 +10,7 @@
  *    | .alloc() ->
  *    | .new() ->
  *    | .update() ->
- *    | .digest or .hexdigest or .inspect -> (Instance.digest or .hexdigest())
- * ->
+ *    | .digest or .hexdigest or .inspect -> (Instance.digest or .hexdigest()) ->
  *    --| .alloc() ->
  *      | .copy() ->
  *      | .finish() ->
@@ -32,6 +31,7 @@ typedef HashReturn (*keccak_init_func)(Keccak_HashInstance*);
 
 /*** Function prototypes ***/
 
+static int compare_contexts(const sha3_digest_context_t*, const sha3_digest_context_t*);
 static inline void get_sha3_digest_context(VALUE, sha3_digest_context_t**);
 static inline void safe_get_sha3_digest_context(VALUE, sha3_digest_context_t**);
 
@@ -41,14 +41,12 @@ static HashReturn keccak_hash_initialize(sha3_digest_context_t*);
 static void sha3_digest_free_context(void*);
 static size_t sha3_digest_context_size(const void*);
 
-static VALUE rb_sha3_kmac_alloc(VALUE);
-
 /* Allocation and initialization */
 static VALUE rb_sha3_digest_alloc(VALUE);
 static VALUE rb_sha3_digest_init(int, VALUE*, VALUE);
+static VALUE rb_sha3_digest_copy(VALUE, VALUE);
 
 /* Core digest operations */
-static VALUE rb_sha3_digest_copy(VALUE, VALUE);
 static VALUE rb_sha3_digest_finish(int, VALUE*, VALUE);
 static VALUE rb_sha3_digest_reset(VALUE);
 static VALUE rb_sha3_digest_update(VALUE, VALUE);
@@ -90,9 +88,6 @@ const rb_data_type_t sha3_digest_data_type_t = {"SHA3::Digest",
                                                 NULL,
                                                 RUBY_TYPED_FREE_IMMEDIATELY};
 
-/*
- * SHA3 module
- */
 void Init_sha3_digest(void) {
     rb_require("digest");
 
@@ -141,15 +136,18 @@ void Init_sha3_digest(void) {
     rb_define_method(_sha3_digest_class, "digest_length", rb_sha3_digest_length, 0);
     rb_define_method(_sha3_digest_class, "block_length", rb_sha3_digest_block_length, 0);
     rb_define_method(_sha3_digest_class, "name", rb_sha3_digest_name, 0);
+
     rb_define_method(_sha3_digest_class, "squeeze", rb_sha3_digest_squeeze, 1);
     rb_define_method(_sha3_digest_class, "hex_squeeze", rb_sha3_digest_hex_squeeze, 1);
     rb_define_method(_sha3_digest_class, "digest", rb_sha3_digest_digest, -1);
     rb_define_method(_sha3_digest_class, "hexdigest", rb_sha3_digest_hexdigest, -1);
+
     rb_define_private_method(_sha3_digest_class, "finish", rb_sha3_digest_finish, -1);
 
     /* Define the class method self.digest */
     rb_define_singleton_method(_sha3_digest_class, "digest", rb_sha3_digest_self_digest, 2);
     rb_define_singleton_method(_sha3_digest_class, "hexdigest", rb_sha3_digest_self_hexdigest, 2);
+
     rb_define_alias(_sha3_digest_class, "<<", "update");
 }
 
@@ -371,7 +369,7 @@ static VALUE rb_sha3_digest_reset(VALUE self) {
     return self;
 }
 
-static int cmp_states(const sha3_digest_context_t* context1, const sha3_digest_context_t* context2) {
+static int compare_contexts(const sha3_digest_context_t* context1, const sha3_digest_context_t* context2) {
     // First check the hashbitlen and algorithm
     if (context1->hashbitlen != context2->hashbitlen || context1->algorithm != context2->algorithm) {
         return 0;
@@ -412,22 +410,28 @@ static int cmp_states(const sha3_digest_context_t* context1, const sha3_digest_c
  * = example
  *   new_digest = digest.dup
  */
-static VALUE rb_sha3_digest_copy(VALUE self, VALUE obj) {
-    sha3_digest_context_t *context1, *context2;
+static VALUE rb_sha3_digest_copy(VALUE self, VALUE other) {
+    sha3_digest_context_t* context;
+    sha3_digest_context_t* other_context;
 
     rb_check_frozen(self);
-    if (self == obj) {
+    if (self == other) {
         return self;
     }
 
-    get_sha3_digest_context(self, &context1);
-    safe_get_sha3_digest_context(obj, &context2);
+    if (!rb_obj_is_kind_of(other, _sha3_digest_class)) {
+        rb_raise(rb_eTypeError, "wrong argument (%s)! (expected %s)", rb_obj_classname(other),
+                 rb_class2name(_sha3_digest_class));
+    }
 
-    memcpy(context1->state, context2->state, sizeof(Keccak_HashInstance));
-    context1->hashbitlen = context2->hashbitlen;
-    context1->algorithm = context2->algorithm;
+    safe_get_sha3_digest_context(other, &other_context);
+    get_sha3_digest_context(self, &context);
 
-    if (!cmp_states(context1, context2)) {
+    context->hashbitlen = other_context->hashbitlen;
+    context->algorithm = other_context->algorithm;
+    memcpy(context->state, other_context->state, sizeof(Keccak_HashInstance));
+
+    if (!compare_contexts(context, other_context)) {
         rb_raise(_sha3_digest_error_class, "failed to copy state");
     }
 
@@ -541,6 +545,7 @@ static VALUE rb_sha3_digest_finish(int argc, VALUE* argv, VALUE self) {
  *   squeeze(length) -> String
  *
  * Returns the squeezed output as a binary string. Only available for SHAKE algorithms.
+ * This method creates a copy of the current instance to preserve the original state.
  *
  * +length+::
  *   The length in bytes of the output to squeeze.
@@ -586,8 +591,6 @@ static VALUE rb_sha3_digest_squeeze(VALUE self, VALUE length) {
         rb_raise(_sha3_digest_error_class, "failed to squeeze output");
     }
 
-    // NOTE: We don't need the copy anymore...Ruby's GC will handle freeing it
-
     return str;
 }
 
@@ -605,16 +608,10 @@ static VALUE rb_sha3_digest_squeeze(VALUE self, VALUE length) {
  *   digest.hex_squeeze(32)  # Get 64 hex characters (32 bytes)
  */
 static VALUE rb_sha3_digest_hex_squeeze(VALUE self, VALUE length) {
-    VALUE bin_str, result_array;
-
     // Get the binary output using the existing squeeze function
-    bin_str = rb_sha3_digest_squeeze(self, length);
-
+    VALUE bin_str = rb_sha3_digest_squeeze(self, length);
     // Use Ruby's built-in unpack method to convert to hex
-    result_array = rb_funcall(bin_str, rb_intern("unpack"), 1, rb_str_new2("H*"));
-
-    // Extract the first element from the array
-    return rb_ary_entry(result_array, 0);
+    return rb_funcall(bin_str, rb_intern("unpack1"), 1, rb_str_new2("H*"));
 }
 
 /*
@@ -654,6 +651,9 @@ static VALUE rb_sha3_digest_digest(int argc, VALUE* argv, VALUE self) {
     if (NIL_P(length)) {
         rb_raise(_sha3_digest_error_class, "output length must be specified for SHAKE algorithms");
     }
+
+    // Add type checking for length
+    Check_Type(length, T_FIXNUM);
 
     // If data is provided, update the state before squeezing
     if (!NIL_P(data)) {
@@ -700,6 +700,9 @@ static VALUE rb_sha3_digest_hexdigest(int argc, VALUE* argv, VALUE self) {
         rb_raise(_sha3_digest_error_class, "output length must be specified for SHAKE algorithms");
     }
 
+    // Add type checking for length
+    Check_Type(length, T_FIXNUM);
+
     // If data is provided, update the state before squeezing
     if (!NIL_P(data)) {
         rb_sha3_digest_update(self, data);
@@ -736,7 +739,9 @@ static VALUE rb_sha3_digest_hexdigest(int argc, VALUE* argv, VALUE self) {
  */
 static VALUE rb_sha3_digest_self_digest(VALUE klass, VALUE name, VALUE data) {
     VALUE args[2];
-    sha3_digest_algorithms algorithm;
+
+    // Need to add type checking for the data parameter
+    StringValue(data);
 
     /* For SHAKE algorithms, we need to handle them differently */
     if (TYPE(name) == T_SYMBOL) {
@@ -792,7 +797,9 @@ static VALUE rb_sha3_digest_self_digest(VALUE klass, VALUE name, VALUE data) {
  */
 static VALUE rb_sha3_digest_self_hexdigest(VALUE klass, VALUE name, VALUE data) {
     VALUE args[2];
-    sha3_digest_algorithms algorithm;
+
+    // Need to add type checking for the data parameter
+    StringValue(data);
 
     /* For SHAKE algorithms, we need to handle them differently */
     if (TYPE(name) == T_SYMBOL) {
