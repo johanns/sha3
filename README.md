@@ -2,13 +2,15 @@
 
 [![Gem Version](https://badge.fury.io/rb/sha3.svg)](https://badge.fury.io/rb/sha3) [![Ruby](https://github.com/johanns/sha3/actions/workflows/main.yml/badge.svg)](https://github.com/johanns/sha3/actions/workflows/main.yml)
 
-A high-performance native binding to the SHA3 (FIPS 202) cryptographic hashing algorithm, based on the [XKCP - eXtended Keccak Code Package](https://github.com/XKCP/XKCP).
+A high-performance native binding to the SHA3 (FIPS 202) cryptographic hashing algorithms, based on the [XKCP - eXtended Keccak Code Package](https://github.com/XKCP/XKCP).
+
+This gem provides support for the standard SHA-3 fixed-length functions (224, 256, 384, and 512 bits), as well as the SHAKE128/SHAKE256 extendable-output functions (XOFs) and KMAC (Keccak Message Authentication Code) as specified in NIST SP 800-185.
 
 > [!CAUTION]
 > **Security Notice**: Do not use SHA-3 for hashing passwords. Instead, use a slow hashing function such as PBKDF2, Argon2, bcrypt, or scrypt.
 
 > [!IMPORTANT]
-> **Breaking Changes**: SHA3 version 2.0 introduces breaking changes to the API. Please review the changelog and ensure compatibility with your application.
+> **Breaking Changes**: SHA3 version 2.0 introduces breaking changes in the API to support new features and functionality. Please review the changelog and ensure compatibility with your application.
 > If you need the previous behavior, lock your Gemfile to version '~> 1.0'.
 
 ## Table of Contents
@@ -19,6 +21,7 @@ A high-performance native binding to the SHA3 (FIPS 202) cryptographic hashing a
 - [Usage](#usage)
   - [SHA-3 Fixed Hash Functions](#sha-3-fixed-hash-functions)
   - [SHAKE128/256 Functions](#shake128256-functions)
+  - [KMAC Functions](#kmac-functions)
   - [Alternate Class Syntax](#alternate-class-syntax)
   - [Hashing a File](#hashing-a-file)
 - [Development](#development)
@@ -38,8 +41,9 @@ A high-performance native binding to the SHA3 (FIPS 202) cryptographic hashing a
 
 ## Features
 
-- Full support for all SHA-3 variants (224, 256, 384, and 512 bit)
+- Full support for all SHA-3 variants (224, 256, 384, and 512 bits)
 - Support for SHAKE128 and SHAKE256 extendable-output functions (XOFs)
+- Support for KMAC (Keccak Message Authentication Code)
 - Native C implementation for high performance
 - Simple, Ruby-friendly API that follows Ruby's standard Digest interface
 - Comprehensive test suite with official NIST test vectors
@@ -119,6 +123,31 @@ second_part = shake.squeeze(64)      # Get 64 bytes
 third_part = shake.hex_squeeze(128)  # Get 128 bytes as hex
 ```
 
+### KMAC Functions
+
+KMAC (Keccak Message Authentication Code) is a message authentication code algorithm based on the SHAKE extendable-output functions:
+
+```ruby
+require 'sha3'
+
+# Create a new KMAC instance
+# Parameters: algorithm, output_length (in bytes), key, [customization]
+kmac = SHA3::KMAC.new(:kmac_128, 32, "my secret key", "app-specific customization")
+
+# Add data to be authenticated
+kmac.update("Authenticate this message")
+
+# Get the result as a hex string
+result = kmac.hexdigest
+# => "a8982c..."
+
+# Or as binary
+binary_result = kmac.digest
+
+# One-shot operation
+result = SHA3::KMAC.hexdigest(:kmac_256, "message", 64, "key", "customization")
+```
+
 ### Alternate Class Syntax
 
 For convenience, you can also use dedicated classes for each algorithm:
@@ -149,6 +178,9 @@ digest.hexdigest
 ```ruby
 # Compute the hash value for a given file, and return the result as hex
 hash = SHA3::Digest::SHA3_256.file("my_file.bin").hexdigest
+
+# Using SHAKE function to squeeze an arbitrary number of bytes
+shake = SHA3::Digest::SHAKE_128.file("my_file.bin").hexdigest(320)
 
 # Calling SHA3::Digest.file(...) defaults to SHA3_256
 hash = SHA3::Digest.file("my_file.bin").hexdigest
@@ -187,7 +219,8 @@ The test vectors are downloaded only once and cached in the `spec/data` director
 
 - [X] Add support for SHA-3 variants (224, 256, 384, and 512 bit)
 - [X] Add support for SHAKE128 and SHAKE256 extendable-output functions (XOFs)
-- [ ] Add support for cSHAKE, TurboSHANKE, and KMAC
+- [X] Add support for KMAC
+- [ ] Add support for cSHAKE
 
 ## Contributing
 
