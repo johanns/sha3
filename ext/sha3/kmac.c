@@ -4,12 +4,6 @@
 #include "SP800-185.h"
 #include "sha3.h"
 
-// SHA3::KMAC.new(algorithm, output_length, key, customization)
-// SHA3::KMAC128.new(output_length, key, customization)
-// SHA3::KMAC256.new(output_length, key, customization)
-// kmac.update
-// kmac.digest | kmac.hexdigest
-
 /*** Types and structs  ***/
 
 typedef enum { KMAC_128 = 0, KMAC_256 } sha3_kmac_algorithms;
