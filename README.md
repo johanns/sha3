@@ -131,11 +131,13 @@ KMAC (Keccak Message Authentication Code) is a message authentication code algor
 require 'sha3'
 
 # Create a new KMAC instance
-# Parameters: algorithm, output_length (in bytes), key, [customization]
+# Parameters: algorithm, output_length (in bytes), key, [customization] optional
 kmac = SHA3::KMAC.new(:kmac_128, 32, "my secret key", "app-specific customization")
 
-# Add data to be authenticated
+# Add data to be authenticated (update can be called multiple times)
 kmac.update("Authenticate this message")
+# or use the << operator
+kmac << "And this too"
 
 # Get the result as a hex string
 result = kmac.hexdigest
@@ -144,7 +146,8 @@ result = kmac.hexdigest
 # Or as binary
 binary_result = kmac.digest
 
-# One-shot operation
+# One-shot operation (customization is optional)
+# Parameters: algorithm, data, output_length (in bytes), data, key, [customization] optional
 result = SHA3::KMAC.hexdigest(:kmac_256, "message", 64, "key", "customization")
 ```
 
