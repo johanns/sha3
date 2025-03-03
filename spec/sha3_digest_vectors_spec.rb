@@ -29,7 +29,7 @@ RSpec.describe SHA3::Digest do
   # Create data directory before running tests
   before(:all) do
     data_dir = File.join(File.dirname(__FILE__), 'data')
-    FileUtils.mkdir_p(data_dir) unless Dir.exist?(data_dir)
+    FileUtils.mkdir_p(data_dir)
   end
 
   # Helper method to process test vectors line by line
@@ -61,7 +61,7 @@ RSpec.describe SHA3::Digest do
   end
 
   # Helper method to download test vectors
-  def ensure_test_vectors(hash_type, url)
+  def fetch_test_vectors(hash_type, url)
     # Simply use the hash_type as the filename
     vector_file = File.join(data_dir, "#{hash_type}.txt")
 
@@ -96,7 +96,7 @@ RSpec.describe SHA3::Digest do
     describe ".new(#{hash_type})" do
       it "passes byte-length test vectors of #{hash_type}" do
         # Ensure test vectors are available
-        vector_file = ensure_test_vectors(hash_type, url)
+        vector_file = fetch_test_vectors(hash_type, url)
 
         # Process test vectors one at a time
         vector_count = 0

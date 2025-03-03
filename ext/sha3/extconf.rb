@@ -40,10 +40,10 @@ $VPATH << vpath_dirs_processed
 # Add include flags
 $INCFLAGS << vpath_dirs_processed
              .map { |dir| " -I$(srcdir)#{dir}" }
-             .join('')
+             .join
 
 # Base source files
-$srcs = ['digest.c', 'sha3.c']
+$srcs = ['digest.c', 'kmac.c', 'sha3.c']
 
 # Find and add all .c files from the filtered directories
 $srcs += vpath_dirs
