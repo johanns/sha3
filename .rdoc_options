@@ -5,6 +5,7 @@ title: SHA3
 charset: UTF-8
 encoding: UTF-8
 force_update: true
+line_numbers: true
 markup: rdoc
 op_dir: html
 visibility: :private
