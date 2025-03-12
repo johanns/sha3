@@ -22,32 +22,32 @@
 typedef enum { SHA3_224 = 0, SHA3_256, SHA3_384, SHA3_512, SHAKE_128, SHAKE_256 } sha3_digest_algorithms;
 
 typedef struct {
-    Keccak_HashInstance* state;
+    Keccak_HashInstance *state;
     int hashbitlen;
     sha3_digest_algorithms algorithm;
 } sha3_digest_context_t;
 
-typedef HashReturn (*keccak_init_func)(Keccak_HashInstance*);
+typedef HashReturn (*keccak_init_func)(Keccak_HashInstance *);
 
 /*** Function prototypes ***/
 
-static int compare_contexts(const sha3_digest_context_t*, const sha3_digest_context_t*);
-static inline void get_sha3_digest_context(VALUE, sha3_digest_context_t**);
-static inline void safe_get_sha3_digest_context(VALUE, sha3_digest_context_t**);
+static int compare_contexts(const sha3_digest_context_t *, const sha3_digest_context_t *);
+static inline void get_sha3_digest_context(VALUE, sha3_digest_context_t **);
+static inline void safe_get_sha3_digest_context(VALUE, sha3_digest_context_t **);
 
-static int get_hashbit_length(VALUE, sha3_digest_algorithms*);
-static HashReturn keccak_hash_initialize(sha3_digest_context_t*);
+static int get_hashbit_length(VALUE, sha3_digest_algorithms *);
+static HashReturn keccak_hash_initialize(sha3_digest_context_t *);
 
-static void sha3_digest_free_context(void*);
-static size_t sha3_digest_context_size(const void*);
+static void sha3_digest_free_context(void *);
+static size_t sha3_digest_context_size(const void *);
 
 /* Allocation and initialization */
 static VALUE rb_sha3_digest_alloc(VALUE);
-static VALUE rb_sha3_digest_init(int, VALUE*, VALUE);
+static VALUE rb_sha3_digest_init(int, VALUE *, VALUE);
 static VALUE rb_sha3_digest_copy(VALUE, VALUE);
 
 /* Core digest operations */
-static VALUE rb_sha3_digest_finish(int, VALUE*, VALUE);
+static VALUE rb_sha3_digest_finish(int, VALUE *, VALUE);
 static VALUE rb_sha3_digest_reset(VALUE);
 static VALUE rb_sha3_digest_update(VALUE, VALUE);
 
@@ -57,8 +57,8 @@ static VALUE rb_sha3_digest_length(VALUE);
 static VALUE rb_sha3_digest_name(VALUE);
 
 /* Output methods */
-static VALUE rb_sha3_digest_digest(int, VALUE*, VALUE);
-static VALUE rb_sha3_digest_hexdigest(int, VALUE*, VALUE);
+static VALUE rb_sha3_digest_digest(int, VALUE *, VALUE);
+static VALUE rb_sha3_digest_hexdigest(int, VALUE *, VALUE);
 static VALUE rb_sha3_digest_hex_squeeze(VALUE, VALUE);
 static VALUE rb_sha3_digest_squeeze(VALUE, VALUE);
 static VALUE rb_sha3_digest_self_digest(VALUE, VALUE, VALUE);
@@ -152,14 +152,14 @@ void Init_sha3_digest(void) {
 }
 
 // Static inline functions replacing macros
-static inline void get_sha3_digest_context(VALUE obj, sha3_digest_context_t** context) {
+static inline void get_sha3_digest_context(VALUE obj, sha3_digest_context_t **context) {
     TypedData_Get_Struct((obj), sha3_digest_context_t, &sha3_digest_data_type_t, (*context));
     if (!(*context)) {
         rb_raise(rb_eRuntimeError, "Digest data not initialized!");
     }
 }
 
-static inline void safe_get_sha3_digest_context(VALUE obj, sha3_digest_context_t** context) {
+static inline void safe_get_sha3_digest_context(VALUE obj, sha3_digest_context_t **context) {
     if (!rb_obj_is_kind_of(obj, _sha3_digest_class)) {
         rb_raise(rb_eTypeError, "wrong argument (%s)! (expected %s)", rb_obj_classname(obj),
                  rb_class2name(_sha3_digest_class));
@@ -167,7 +167,7 @@ static inline void safe_get_sha3_digest_context(VALUE obj, sha3_digest_context_t
     get_sha3_digest_context(obj, context);
 }
 
-int get_hashbit_length(VALUE obj, sha3_digest_algorithms* algorithm) {
+int get_hashbit_length(VALUE obj, sha3_digest_algorithms *algorithm) {
     if (TYPE(obj) == T_SYMBOL) {
         ID symid = SYM2ID(obj);
 
@@ -200,8 +200,8 @@ int get_hashbit_length(VALUE obj, sha3_digest_algorithms* algorithm) {
     return 0;  // Never reached, but silences compiler warnings
 }
 
-static void sha3_digest_free_context(void* ptr) {
-    sha3_digest_context_t* context = (sha3_digest_context_t*)ptr;
+static void sha3_digest_free_context(void *ptr) {
+    sha3_digest_context_t *context = (sha3_digest_context_t *)ptr;
     if (context) {
         if (context->state) {
             free(context->state);
@@ -210,8 +210,8 @@ static void sha3_digest_free_context(void* ptr) {
     }
 }
 
-static size_t sha3_digest_context_size(const void* ptr) {
-    const sha3_digest_context_t* context = (const sha3_digest_context_t*)ptr;
+static size_t sha3_digest_context_size(const void *ptr) {
+    const sha3_digest_context_t *context = (const sha3_digest_context_t *)ptr;
     size_t size = sizeof(sha3_digest_context_t);
 
     if (context && context->state) {
@@ -221,7 +221,7 @@ static size_t sha3_digest_context_size(const void* ptr) {
     return size;
 }
 
-static HashReturn keccak_hash_initialize(sha3_digest_context_t* context) {
+static HashReturn keccak_hash_initialize(sha3_digest_context_t *context) {
     switch (context->algorithm) {
         case SHA3_224:
             return Keccak_HashInitialize_SHA3_224(context->state);
@@ -241,12 +241,12 @@ static HashReturn keccak_hash_initialize(sha3_digest_context_t* context) {
 }
 
 static VALUE rb_sha3_digest_alloc(VALUE klass) {
-    sha3_digest_context_t* context = (sha3_digest_context_t*)malloc(sizeof(sha3_digest_context_t));
+    sha3_digest_context_t *context = (sha3_digest_context_t *)malloc(sizeof(sha3_digest_context_t));
     if (!context) {
         rb_raise(_sha3_digest_error_class, "failed to allocate object memory");
     }
 
-    context->state = (Keccak_HashInstance*)calloc(1, sizeof(Keccak_HashInstance));
+    context->state = (Keccak_HashInstance *)calloc(1, sizeof(Keccak_HashInstance));
     if (!context->state) {
         sha3_digest_free_context(context);
         rb_raise(_sha3_digest_error_class, "failed to allocate state memory");
@@ -283,8 +283,8 @@ static VALUE rb_sha3_digest_alloc(VALUE klass) {
  *   SHA3::Digest.new(:sha3_256)
  *   SHA3::Digest.new(:shake_128, "initial data")
  */
-static VALUE rb_sha3_digest_init(int argc, VALUE* argv, VALUE self) {
-    sha3_digest_context_t* context;
+static VALUE rb_sha3_digest_init(int argc, VALUE *argv, VALUE self) {
+    sha3_digest_context_t *context;
     VALUE hlen, data;
 
     rb_scan_args(argc, argv, "02", &hlen, &data);
@@ -322,7 +322,7 @@ static VALUE rb_sha3_digest_init(int argc, VALUE* argv, VALUE self) {
  *   digest << "more data"  # alias for update
  */
 static VALUE rb_sha3_digest_update(VALUE self, VALUE data) {
-    sha3_digest_context_t* context;
+    sha3_digest_context_t *context;
     BitLength dlen;
 
     StringValue(data);
@@ -340,7 +340,7 @@ static VALUE rb_sha3_digest_update(VALUE self, VALUE data) {
 
     dlen = (RSTRING_LEN(data) * 8);
 
-    if (Keccak_HashUpdate(context->state, (BitSequence*)RSTRING_PTR(data), dlen) != KECCAK_SUCCESS) {
+    if (Keccak_HashUpdate(context->state, (BitSequence *)RSTRING_PTR(data), dlen) != KECCAK_SUCCESS) {
         rb_raise(_sha3_digest_error_class, "failed to update hash data");
     }
 
@@ -357,7 +357,7 @@ static VALUE rb_sha3_digest_update(VALUE self, VALUE data) {
  *   digest.reset
  */
 static VALUE rb_sha3_digest_reset(VALUE self) {
-    sha3_digest_context_t* context;
+    sha3_digest_context_t *context;
     get_sha3_digest_context(self, &context);
 
     memset(context->state, 0, sizeof(Keccak_HashInstance));
@@ -369,7 +369,7 @@ static VALUE rb_sha3_digest_reset(VALUE self) {
     return self;
 }
 
-static int compare_contexts(const sha3_digest_context_t* context1, const sha3_digest_context_t* context2) {
+static int compare_contexts(const sha3_digest_context_t *context1, const sha3_digest_context_t *context2) {
     // First check the hashbitlen and algorithm
     if (context1->hashbitlen != context2->hashbitlen || context1->algorithm != context2->algorithm) {
         return 0;
@@ -411,8 +411,8 @@ static int compare_contexts(const sha3_digest_context_t* context1, const sha3_di
  *   new_digest = digest.dup
  */
 static VALUE rb_sha3_digest_copy(VALUE self, VALUE other) {
-    sha3_digest_context_t* context;
-    sha3_digest_context_t* other_context;
+    sha3_digest_context_t *context;
+    sha3_digest_context_t *other_context;
 
     rb_check_frozen(self);
     if (self == other) {
@@ -448,7 +448,7 @@ static VALUE rb_sha3_digest_copy(VALUE self, VALUE other) {
  *   digest.length  #=> 32 for SHA3-256
  */
 static VALUE rb_sha3_digest_length(VALUE self) {
-    sha3_digest_context_t* context;
+    sha3_digest_context_t *context;
     get_sha3_digest_context(self, &context);
 
     return ULL2NUM(context->hashbitlen / 8);
@@ -464,7 +464,7 @@ static VALUE rb_sha3_digest_length(VALUE self) {
  *   digest.block_length
  */
 static VALUE rb_sha3_digest_block_length(VALUE self) {
-    sha3_digest_context_t* context;
+    sha3_digest_context_t *context;
     get_sha3_digest_context(self, &context);
 
     return ULL2NUM(200 - (2 * (context->hashbitlen / 8)));
@@ -480,7 +480,7 @@ static VALUE rb_sha3_digest_block_length(VALUE self) {
  *   digest.name  #=> "SHA3-256"
  */
 static VALUE rb_sha3_digest_name(VALUE self) {
-    sha3_digest_context_t* context;
+    sha3_digest_context_t *context;
     get_sha3_digest_context(self, &context);
 
     switch (context->algorithm) {
@@ -514,8 +514,8 @@ static VALUE rb_sha3_digest_name(VALUE self) {
  *   digest.finish
  *   digest.finish("final chunk")
  */
-static VALUE rb_sha3_digest_finish(int argc, VALUE* argv, VALUE self) {
-    sha3_digest_context_t* context;
+static VALUE rb_sha3_digest_finish(int argc, VALUE *argv, VALUE self) {
+    sha3_digest_context_t *context;
     VALUE str;
     int digest_bytes;
 
@@ -533,7 +533,7 @@ static VALUE rb_sha3_digest_finish(int argc, VALUE* argv, VALUE self) {
         rb_str_resize(str, digest_bytes);
     }
 
-    if (Keccak_HashFinal(context->state, (BitSequence*)RSTRING_PTR(str)) != KECCAK_SUCCESS) {
+    if (Keccak_HashFinal(context->state, (BitSequence *)RSTRING_PTR(str)) != KECCAK_SUCCESS) {
         rb_raise(_sha3_digest_error_class, "failed to finalize digest");
     }
 
@@ -554,7 +554,7 @@ static VALUE rb_sha3_digest_finish(int argc, VALUE* argv, VALUE self) {
  *   digest.squeeze(32)  # Get 32 bytes of output
  */
 static VALUE rb_sha3_digest_squeeze(VALUE self, VALUE length) {
-    sha3_digest_context_t* context;
+    sha3_digest_context_t *context;
     VALUE str, copy;
     int output_bytes;
 
@@ -576,7 +576,7 @@ static VALUE rb_sha3_digest_squeeze(VALUE self, VALUE length) {
     copy = rb_obj_clone(self);
 
     // Get the sha3_digest_context_t struct from the copy
-    sha3_digest_context_t* context_copy;
+    sha3_digest_context_t *context_copy;
     get_sha3_digest_context(copy, &context_copy);
 
     str = rb_str_new(0, output_bytes);
@@ -587,7 +587,7 @@ static VALUE rb_sha3_digest_squeeze(VALUE self, VALUE length) {
     }
 
     // Then squeeze out the desired number of bytes
-    if (Keccak_HashSqueeze(context_copy->state, (BitSequence*)RSTRING_PTR(str), output_bytes * 8) != KECCAK_SUCCESS) {
+    if (Keccak_HashSqueeze(context_copy->state, (BitSequence *)RSTRING_PTR(str), output_bytes * 8) != KECCAK_SUCCESS) {
         rb_raise(_sha3_digest_error_class, "failed to squeeze output");
     }
 
@@ -636,8 +636,8 @@ static VALUE rb_sha3_digest_hex_squeeze(VALUE self, VALUE length) {
  *   digest.digest(12)  # For SHAKE algorithms
  *   digest.digest(12, 'compute me')  # For SHAKE algorithms
  */
-static VALUE rb_sha3_digest_digest(int argc, VALUE* argv, VALUE self) {
-    sha3_digest_context_t* context;
+static VALUE rb_sha3_digest_digest(int argc, VALUE *argv, VALUE self) {
+    sha3_digest_context_t *context;
     get_sha3_digest_context(self, &context);
 
     if (context->algorithm != SHAKE_128 && context->algorithm != SHAKE_256) {
@@ -685,8 +685,8 @@ static VALUE rb_sha3_digest_digest(int argc, VALUE* argv, VALUE self) {
  *   digest.hexdigest(12)  # For SHAKE algorithms
  *   digest.hexdigest(12, 'compute me')  # For SHAKE algorithms
  */
-static VALUE rb_sha3_digest_hexdigest(int argc, VALUE* argv, VALUE self) {
-    sha3_digest_context_t* context;
+static VALUE rb_sha3_digest_hexdigest(int argc, VALUE *argv, VALUE self) {
+    sha3_digest_context_t *context;
     get_sha3_digest_context(self, &context);
 
     if (context->algorithm != SHAKE_128 && context->algorithm != SHAKE_256) {

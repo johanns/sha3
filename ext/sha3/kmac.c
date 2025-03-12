@@ -9,7 +9,7 @@
 typedef enum { KMAC_128 = 0, KMAC_256 } sha3_kmac_algorithms;
 
 typedef struct {
-    KMAC_Instance* state;
+    KMAC_Instance *state;
     sha3_kmac_algorithms algorithm;
 
     size_t output_length;
@@ -17,27 +17,28 @@ typedef struct {
 
 /*** Function prototypes ***/
 
-static int compare_contexts(const sha3_kmac_context_t*, const sha3_kmac_context_t*);
-static void sha3_kmac_free_context(void*);
-static size_t sha3_kmac_context_size(const void*);
+static int compare_contexts(const sha3_kmac_context_t *, const sha3_kmac_context_t *);
+static void sha3_kmac_free_context(void *);
+static size_t sha3_kmac_context_size(const void *);
 
 /* Allocation and initialization */
 static VALUE rb_sha3_kmac_alloc(VALUE);
-static VALUE rb_sha3_kmac_init(int, VALUE*, VALUE);
+static VALUE rb_sha3_kmac_init(int, VALUE *, VALUE);
 static VALUE rb_sha3_kmac_copy(VALUE, VALUE);
 
 /* Core digest operations */
-static VALUE rb_sha3_kmac_finish(int, VALUE*, VALUE);
+static VALUE rb_sha3_kmac_finish(int, VALUE *, VALUE);
 static VALUE rb_sha3_kmac_update(VALUE, VALUE);
 
 /* Digest properties */
 static VALUE rb_sha3_kmac_name(VALUE);
 
 /* Output methods */
-static VALUE rb_sha3_kmac_digest(int, VALUE*, VALUE);
-static VALUE rb_sha3_kmac_hexdigest(int, VALUE*, VALUE);
-static VALUE rb_sha3_kmac_self_digest(int, VALUE*, VALUE);
-static VALUE rb_sha3_kmac_self_hexdigest(int, VALUE*, VALUE);
+static VALUE rb_sha3_kmac_digest(int, VALUE *, VALUE);
+static VALUE rb_sha3_kmac_hexdigest(int, VALUE *, VALUE);
+static VALUE rb_sha3_kmac_self_digest(int, VALUE *, VALUE);
+static VALUE rb_sha3_kmac_self_hexdigest(int, VALUE *, VALUE);
+
 
 /*** Global variables ***/
 
@@ -104,7 +105,7 @@ void Init_sha3_kmac(void) {
     return;
 }
 
-static int compare_contexts(const sha3_kmac_context_t* context1, const sha3_kmac_context_t* context2) {
+static int compare_contexts(const sha3_kmac_context_t *context1, const sha3_kmac_context_t *context2) {
     // First check the algorithm
     if (context1->algorithm != context2->algorithm) {
         return 0;
@@ -119,14 +120,14 @@ static int compare_contexts(const sha3_kmac_context_t* context1, const sha3_kmac
     return 1;
 }
 
-static inline void get_sha3_kmac_context(VALUE obj, sha3_kmac_context_t** context) {
+static inline void get_sha3_kmac_context(VALUE obj, sha3_kmac_context_t **context) {
     TypedData_Get_Struct((obj), sha3_kmac_context_t, &sha3_kmac_data_type_t, (*context));
     if (!(*context)) {
         rb_raise(rb_eRuntimeError, "KMAC data not initialized!");
     }
 }
 
-static inline void safe_get_sha3_kmac_context(VALUE obj, sha3_kmac_context_t** context) {
+static inline void safe_get_sha3_kmac_context(VALUE obj, sha3_kmac_context_t **context) {
     if (!rb_obj_is_kind_of(obj, _sha3_kmac_class)) {
         rb_raise(rb_eTypeError, "wrong argument (%s)! (expected %s)", rb_obj_classname(obj),
                  rb_class2name(_sha3_kmac_class));
@@ -134,8 +135,8 @@ static inline void safe_get_sha3_kmac_context(VALUE obj, sha3_kmac_context_t** c
     get_sha3_kmac_context(obj, context);
 }
 
-static void sha3_kmac_free_context(void* ptr) {
-    sha3_kmac_context_t* context = (sha3_kmac_context_t*)ptr;
+static void sha3_kmac_free_context(void *ptr) {
+    sha3_kmac_context_t *context = (sha3_kmac_context_t *)ptr;
     if (context) {
         if (context->state) {
             free(context->state);
@@ -144,8 +145,8 @@ static void sha3_kmac_free_context(void* ptr) {
     }
 }
 
-static size_t sha3_kmac_context_size(const void* ptr) {
-    const sha3_kmac_context_t* context = (const sha3_kmac_context_t*)ptr;
+static size_t sha3_kmac_context_size(const void *ptr) {
+    const sha3_kmac_context_t *context = (const sha3_kmac_context_t *)ptr;
     size_t size = sizeof(sha3_kmac_context_t);
 
     if (context && context->state) {
@@ -156,12 +157,12 @@ static size_t sha3_kmac_context_size(const void* ptr) {
 }
 
 static VALUE rb_sha3_kmac_alloc(VALUE klass) {
-    sha3_kmac_context_t* context = (sha3_kmac_context_t*)malloc(sizeof(sha3_kmac_context_t));
+    sha3_kmac_context_t *context = (sha3_kmac_context_t *)malloc(sizeof(sha3_kmac_context_t));
     if (!context) {
         rb_raise(_sha3_kmac_error_class, "failed to allocate object memory");
     }
 
-    context->state = (KMAC_Instance*)calloc(1, sizeof(KMAC_Instance));
+    context->state = (KMAC_Instance *)calloc(1, sizeof(KMAC_Instance));
     if (!context->state) {
         sha3_kmac_free_context(context);
         rb_raise(_sha3_kmac_error_class, "failed to allocate state memory");
@@ -187,7 +188,7 @@ static VALUE rb_sha3_kmac_alloc(VALUE klass) {
  *   - :kmac_256
  *
  * +output_length+::
- *   The length of the output in bytes.
+ *   The length of the output in bytes. Set to 0 for an arbitrarily-long output using "squeeze" (XOF) methods.
  *
  * +key+::
  *   The key to use for the KMAC.
@@ -198,9 +199,11 @@ static VALUE rb_sha3_kmac_alloc(VALUE klass) {
  * = example
  *   SHA3::KMAC.new(:kmac_128, 32, "key")
  *   SHA3::KMAC.new(:kmac_256, 64, "key", "customization")
+ *   SHA3::KMAC.new(:kmac_128, 0, "key", "customization")
+ *
  */
-static VALUE rb_sha3_kmac_init(int argc, VALUE* argv, VALUE self) {
-    sha3_kmac_context_t* context;
+static VALUE rb_sha3_kmac_init(int argc, VALUE *argv, VALUE self) {
+    sha3_kmac_context_t *context;
     VALUE algorithm, output_length, key, customization;
 
     rb_scan_args(argc, argv, "31", &algorithm, &output_length, &key, &customization);
@@ -224,17 +227,17 @@ static VALUE rb_sha3_kmac_init(int argc, VALUE* argv, VALUE self) {
     if (!NIL_P(key)) {
         Check_Type(key, T_STRING);
         size_t key_len = RSTRING_LEN(key) * 8;
-        const unsigned char* key_ptr = (const unsigned char*)RSTRING_PTR(key);
+        const unsigned char *key_ptr = (const unsigned char *)RSTRING_PTR(key);
 
         if (context->algorithm == KMAC_128) {
             if (KMAC128_Initialize(context->state, key_ptr, key_len, context->output_length,
-                                   NIL_P(customization) ? NULL : (const unsigned char*)RSTRING_PTR(customization),
+                                   NIL_P(customization) ? NULL : (const unsigned char *)RSTRING_PTR(customization),
                                    NIL_P(customization) ? 0 : RSTRING_LEN(customization) * 8) != 0) {
                 rb_raise(_sha3_kmac_error_class, "failed to initialize KMAC128");
             }
         } else {
             if (KMAC256_Initialize(context->state, key_ptr, key_len, context->output_length,
-                                   NIL_P(customization) ? NULL : (const unsigned char*)RSTRING_PTR(customization),
+                                   NIL_P(customization) ? NULL : (const unsigned char *)RSTRING_PTR(customization),
                                    NIL_P(customization) ? 0 : RSTRING_LEN(customization) * 8) != 0) {
                 rb_raise(_sha3_kmac_error_class, "failed to initialize KMAC256");
             }
@@ -257,8 +260,8 @@ static VALUE rb_sha3_kmac_init(int argc, VALUE* argv, VALUE self) {
  *   new_kmac = kmac.dup
  */
 static VALUE rb_sha3_kmac_copy(VALUE self, VALUE other) {
-    sha3_kmac_context_t* context;
-    sha3_kmac_context_t* other_context;
+    sha3_kmac_context_t *context;
+    sha3_kmac_context_t *other_context;
 
     rb_check_frozen(self);
     if (self == other) {
@@ -298,7 +301,7 @@ static VALUE rb_sha3_kmac_copy(VALUE self, VALUE other) {
  *   kmac << "more data"  # alias for update
  */
 static VALUE rb_sha3_kmac_update(VALUE self, VALUE data) {
-    sha3_kmac_context_t* context;
+    sha3_kmac_context_t *context;
     size_t data_len;
 
     Check_Type(data, T_STRING);
@@ -307,11 +310,11 @@ static VALUE rb_sha3_kmac_update(VALUE self, VALUE data) {
     get_sha3_kmac_context(self, &context);
 
     if (context->algorithm == KMAC_128) {
-        if (KMAC128_Update(context->state, (const BitSequence*)RSTRING_PTR(data), data_len) != 0) {
+        if (KMAC128_Update(context->state, (const BitSequence *)RSTRING_PTR(data), data_len) != 0) {
             rb_raise(_sha3_kmac_error_class, "failed to update KMAC128");
         }
     } else {
-        if (KMAC256_Update(context->state, (const BitSequence*)RSTRING_PTR(data), data_len) != 0) {
+        if (KMAC256_Update(context->state, (const BitSequence *)RSTRING_PTR(data), data_len) != 0) {
             rb_raise(_sha3_kmac_error_class, "failed to update KMAC256");
         }
     }
@@ -331,8 +334,8 @@ static VALUE rb_sha3_kmac_update(VALUE self, VALUE data) {
  * = example
  *   kmac.finish
  */
-static VALUE rb_sha3_kmac_finish(int argc, VALUE* argv, VALUE self) {
-    sha3_kmac_context_t* context;
+static VALUE rb_sha3_kmac_finish(int argc, VALUE *argv, VALUE self) {
+    sha3_kmac_context_t *context;
     VALUE output;
 
     rb_scan_args(argc, argv, "01", &output);
@@ -347,11 +350,11 @@ static VALUE rb_sha3_kmac_finish(int argc, VALUE* argv, VALUE self) {
     }
 
     if (context->algorithm == KMAC_128) {
-        if (KMAC128_Final(context->state, (BitSequence*)RSTRING_PTR(output)) != 0) {
+        if (KMAC128_Final(context->state, (BitSequence *)RSTRING_PTR(output)) != 0) {
             rb_raise(_sha3_kmac_error_class, "failed to finalize KMAC128");
         }
     } else {
-        if (KMAC256_Final(context->state, (BitSequence*)RSTRING_PTR(output)) != 0) {
+        if (KMAC256_Final(context->state, (BitSequence *)RSTRING_PTR(output)) != 0) {
             rb_raise(_sha3_kmac_error_class, "failed to finalize KMAC256");
         }
     }
@@ -369,7 +372,7 @@ static VALUE rb_sha3_kmac_finish(int argc, VALUE* argv, VALUE self) {
  *   kmac.name  #=> "KMAC128" or "KMAC256"
  */
 static VALUE rb_sha3_kmac_name(VALUE self) {
-    sha3_kmac_context_t* context;
+    sha3_kmac_context_t *context;
 
     get_sha3_kmac_context(self, &context);
 
@@ -399,7 +402,7 @@ static VALUE rb_sha3_kmac_name(VALUE self) {
  *   kmac.digest
  *   kmac.digest('final chunk')
  */
-static VALUE rb_sha3_kmac_digest(int argc, VALUE* argv, VALUE self) {
+static VALUE rb_sha3_kmac_digest(int argc, VALUE *argv, VALUE self) {
     VALUE copy, data;
 
     rb_scan_args(argc, argv, "01", &data);
@@ -411,7 +414,6 @@ static VALUE rb_sha3_kmac_digest(int argc, VALUE* argv, VALUE self) {
     if (!NIL_P(data)) {
         rb_sha3_kmac_update(copy, data);
     }
-
     // Call finish on the copy
     return rb_sha3_kmac_finish(0, NULL, copy);
 }
@@ -432,7 +434,7 @@ static VALUE rb_sha3_kmac_digest(int argc, VALUE* argv, VALUE self) {
  *   kmac.hexdigest
  *   kmac.hexdigest('final chunk')
  */
-static VALUE rb_sha3_kmac_hexdigest(int argc, VALUE* argv, VALUE self) {
+static VALUE rb_sha3_kmac_hexdigest(int argc, VALUE *argv, VALUE self) {
     VALUE bin_str = rb_sha3_kmac_digest(argc, argv, self);
     return rb_funcall(bin_str, rb_intern("unpack1"), 1, rb_str_new2("H*"));
 }
@@ -458,7 +460,7 @@ static VALUE rb_sha3_kmac_hexdigest(int argc, VALUE* argv, VALUE self) {
  *   SHA3::KMAC.digest(:kmac_128, "data", 32, "key")
  *   SHA3::KMAC.digest(:kmac_128, "data", 32, "key", "customization")
  */
-static VALUE rb_sha3_kmac_self_digest(int argc, VALUE* argv, VALUE klass) {
+static VALUE rb_sha3_kmac_self_digest(int argc, VALUE *argv, VALUE klass) {
     VALUE algorithm, data, output_length, key, customization;
 
     rb_scan_args(argc, argv, "41", &algorithm, &data, &output_length, &key, &customization);
@@ -488,7 +490,7 @@ static VALUE rb_sha3_kmac_self_digest(int argc, VALUE* argv, VALUE klass) {
  *   SHA3::KMAC.hexdigest(:kmac_128, "data", 32, "key")
  *   SHA3::KMAC.hexdigest(:kmac_128, "data", 32, "key", "customization")
  */
-static VALUE rb_sha3_kmac_self_hexdigest(int argc, VALUE* argv, VALUE klass) {
+static VALUE rb_sha3_kmac_self_hexdigest(int argc, VALUE *argv, VALUE klass) {
     VALUE algorithm, data, output_length, key, customization;
 
     rb_scan_args(argc, argv, "41", &algorithm, &data, &output_length, &key, &customization);
