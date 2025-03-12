@@ -39,6 +39,8 @@ static VALUE rb_sha3_kmac_hexdigest(int, VALUE *, VALUE);
 static VALUE rb_sha3_kmac_self_digest(int, VALUE *, VALUE);
 static VALUE rb_sha3_kmac_self_hexdigest(int, VALUE *, VALUE);
 
+static VALUE rb_sha3_kmac_squeeze(VALUE, VALUE);
+static VALUE rb_sha3_kmac_hex_squeeze(VALUE, VALUE);
 
 /*** Global variables ***/
 
@@ -94,6 +96,9 @@ void Init_sha3_kmac(void) {
 
     rb_define_method(_sha3_kmac_class, "digest", rb_sha3_kmac_digest, -1);
     rb_define_method(_sha3_kmac_class, "hexdigest", rb_sha3_kmac_hexdigest, -1);
+
+    rb_define_method(_sha3_kmac_class, "squeeze", rb_sha3_kmac_squeeze, 1);
+    rb_define_method(_sha3_kmac_class, "hex_squeeze", rb_sha3_kmac_hex_squeeze, 1);
 
     rb_define_private_method(_sha3_kmac_class, "finish", rb_sha3_kmac_finish, -1);
 
@@ -437,6 +442,79 @@ static VALUE rb_sha3_kmac_digest(int argc, VALUE *argv, VALUE self) {
 static VALUE rb_sha3_kmac_hexdigest(int argc, VALUE *argv, VALUE self) {
     VALUE bin_str = rb_sha3_kmac_digest(argc, argv, self);
     return rb_funcall(bin_str, rb_intern("unpack1"), 1, rb_str_new2("H*"));
+}
+
+/*
+ * :call-seq:
+ *   squeeze(length) -> string
+ *
+ * Returns the squeezed output as a binary string.
+ * This method creates a copy of the current instance so that
+ * the original state is preserved for future updates.
+ *
+ * = note
+ * The KMAC instance must be initialized with 0 output length before calling this method.
+ *
+ * = example
+ *   kmac.squeeze(128)
+ */
+static VALUE rb_sha3_kmac_squeeze(VALUE self, VALUE length) {
+    sha3_kmac_context_t *context;
+    size_t output_byte_len;
+    VALUE str, copy;
+
+    Check_Type(length, T_FIXNUM);
+    output_byte_len = NUM2ULONG(length);
+
+    if (output_byte_len == 0) {
+        rb_raise(_sha3_kmac_error_class, "output length must be specified");
+    }
+
+    get_sha3_kmac_context(self, &context);
+
+    // Create a copy of the instance to avoid modifying the original
+    copy = rb_obj_clone(self);
+
+    sha3_kmac_context_t *copy_context;
+    get_sha3_kmac_context(copy, &copy_context);
+
+    // First call finish() on the copy to transition the state to FINAL
+    rb_sha3_kmac_finish(0, NULL, copy);
+
+    // Allocate the output buffer for the specified number of bytes
+    str = rb_str_new(0, output_byte_len);
+
+    // Now squeeze the requested number of bits
+    if (copy_context->algorithm == KMAC_128) {
+        if (KMAC128_Squeeze(copy_context->state, (BitSequence *)RSTRING_PTR(str), output_byte_len * 8) != 0) {
+            rb_raise(_sha3_kmac_error_class, "failed to squeeze KMAC128");
+        }
+    } else {
+        if (KMAC256_Squeeze(copy_context->state, (BitSequence *)RSTRING_PTR(str), output_byte_len * 8) != 0) {
+            rb_raise(_sha3_kmac_error_class, "failed to squeeze KMAC256");
+        }
+    }
+
+    return str;
+}
+
+/*
+ * :call-seq:
+ *   hex_squeeze(length) -> string
+ *
+ * Returns the squeezed output as a hexadecimal string.
+ * This method creates a copy of the current instance so that
+ * the original state is preserved for future updates.
+ *
+ * = note
+ * The KMAC instance must be initialized with 0 output length before calling this method.
+ *
+ * = example
+ *   kmac.hex_squeeze(128)
+ */
+static VALUE rb_sha3_kmac_hex_squeeze(VALUE self, VALUE length) {
+    VALUE binary_result = rb_sha3_kmac_squeeze(self, length);
+    return rb_funcall(binary_result, rb_intern("unpack1"), 1, rb_str_new2("H*"));
 }
 
 /*
