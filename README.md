@@ -4,14 +4,13 @@
 
 A high-performance native binding to the SHA3 (FIPS 202) cryptographic hashing algorithms, based on the [XKCP - eXtended Keccak Code Package](https://github.com/XKCP/XKCP).
 
-This gem provides support for the standard SHA-3 fixed-length functions (224, 256, 384, and 512 bits), as well as the SHAKE128/SHAKE256 extendable-output functions (XOFs) and KMAC (Keccak Message Authentication Code) as specified in NIST SP 800-185.
+This gem provides support for the standard SHA-3 fixed-length functions (224, 256, 384, and 512 bits), as well as the SHAKE128/SHAKE256 extendable-output functions (XOFs), cSHAKE128/cSHAKE256, and KMAC (Keccak Message Authentication Code) as specified in NIST SP 800-185.
 
 > [!CAUTION]
 > **Security Notice**: Do not use SHA-3 for hashing passwords. Instead, use a slow hashing function such as PBKDF2, Argon2, bcrypt, or scrypt.
 
 > [!IMPORTANT]
-> **Breaking Changes**: SHA3 version 2.0 introduces breaking changes in the API to support new features and functionality. Please review the changelog and ensure compatibility with your application.
-> If you need the previous behavior, lock your Gemfile to version '~> 1.0'.
+> **Breaking Changes**: SHA3 version 2.0 introduces breaking changes in the API to support new features and functionality. Please review the changelog and ensure compatibility with your application. If you need the previous behavior, lock your Gemfile to version '~> 1.0'.
 
 ## Table of Contents
 
@@ -20,10 +19,11 @@ This gem provides support for the standard SHA-3 fixed-length functions (224, 25
 - [Installation](#installation)
 - [Usage](#usage)
   - [SHA-3 Fixed Hash Functions](#sha-3-fixed-hash-functions)
-  - [SHAKE128/256 Functions](#shake128256-functions)
-  - [KMAC Functions](#kmac-functions)
   - [Alternate Class Syntax](#alternate-class-syntax)
   - [Hashing a File](#hashing-a-file)
+  - [SHAKE128/256 Functions](#shake128256-functions)
+  - [cSHAKE128/256 Functions](#cshake128256-functions)
+  - [KMAC Functions](#kmac-functions)
 - [Development](#development)
   - [Dependencies](#dependencies)
   - [Testing](#testing)
@@ -43,6 +43,7 @@ This gem provides support for the standard SHA-3 fixed-length functions (224, 25
 
 - Full support for all SHA-3 variants (224, 256, 384, and 512 bits)
 - Support for SHAKE128 and SHAKE256 extendable-output functions (XOFs)
+- Support for cSHAKE128 and cSHAKE256 extendable-output functions (XOFs) with domain separation and personalization
 - Support for KMAC (Keccak Message Authentication Code)
 - Native C implementation for high performance
 - Simple, Ruby-friendly API that follows Ruby's standard Digest interface
@@ -54,7 +55,7 @@ This gem provides support for the standard SHA-3 fixed-length functions (224, 25
 Add this line to your application's Gemfile:
 
 ```ruby
-gem 'sha3', '~> 2.0'
+gem 'sha3', '~> 2.2'
 ```
 
 And then execute:
@@ -100,57 +101,6 @@ Valid algorithm symbols are:
 - `:shake_128` - SHAKE128 extendable-output function
 - `:shake_256` - SHAKE256 extendable-output function
 
-### SHAKE128/256 Functions
-
-SHAKE128 and SHAKE256 are extendable-output functions (XOFs) that allow you to "squeeze" an arbitrary number of bytes from the hash state:
-
-```ruby
-# Create a new SHAKE128 instance
-shake = SHA3::Digest.new(:shake_128)
-
-# Add data to be hashed
-shake << 'Squeeze this data...'
-
-# Squeeze 120 bytes (240 hex characters) from the hash state
-result = shake.hex_squeeze(120)
-
-# Or get binary output
-binary_result = shake.squeeze(1024)
-
-# You can call squeeze functions multiple times with arbitrary output lengths
-first_part = shake.squeeze(32)       # Get 32 bytes
-second_part = shake.squeeze(64)      # Get 64 bytes
-third_part = shake.hex_squeeze(128)  # Get 128 bytes as hex
-```
-
-### KMAC Functions
-
-KMAC (Keccak Message Authentication Code) is a message authentication code algorithm based on the SHAKE extendable-output functions:
-
-```ruby
-require 'sha3'
-
-# Create a new KMAC instance
-# Parameters: algorithm, output_length (in bytes), key, [customization] optional
-kmac = SHA3::KMAC.new(:kmac_128, 32, "my secret key", "app-specific customization")
-
-# Add data to be authenticated (update can be called multiple times)
-kmac.update("Authenticate this message")
-# or use the << operator
-kmac << "And this too"
-
-# Get the result as a hex string
-result = kmac.hexdigest
-# => "a8982c..."
-
-# Or as binary
-binary_result = kmac.digest
-
-# One-shot operation (customization is optional)
-# Parameters: algorithm, data, output_length (in bytes), data, key, [customization] optional
-result = SHA3::KMAC.hexdigest(:kmac_256, "message", 64, "key", "customization")
-```
-
 ### Alternate Class Syntax
 
 For convenience, you can also use dedicated classes for each algorithm:
@@ -182,12 +132,87 @@ digest.hexdigest
 # Compute the hash value for a given file, and return the result as hex
 hash = SHA3::Digest::SHA3_256.file("my_file.bin").hexdigest
 
-# Using SHAKE function to squeeze an arbitrary number of bytes
+# Using SHAKE function to generate an arbitrary-length hash output
 shake = SHA3::Digest::SHAKE_128.file("my_file.bin").hexdigest(320)
 
 # Calling SHA3::Digest.file(...) defaults to SHA3_256
 hash = SHA3::Digest.file("my_file.bin").hexdigest
 # => "a9801db49389339..."
+```
+
+### SHAKE128/256 Functions
+
+SHAKE128 and SHAKE256 are extendable-output functions (XOFs) that allow you to "squeeze" an arbitrary number of bytes from the hash state:
+
+```ruby
+# Create a new SHAKE128 instance
+shake = SHA3::Digest.new(:shake128)
+
+# Add data to hash
+shake << 'Squeeze this data...'
+
+# Squeeze 120 bytes (240 hex characters) from the hash state
+result = shake.hex_squeeze(120)
+
+# Or get binary output
+binary_result = shake.squeeze(1024)
+
+# You can call squeeze functions multiple times with arbitrary output lengths
+first_part = shake.squeeze(32)       # Get 32 bytes
+second_part = shake.squeeze(64)      # Get 64 bytes
+third_part = shake.hex_squeeze(128)  # Get 128 bytes as hex
+```
+
+### cSHAKE128/256 Functions
+
+cSHAKE128 and cSHAKE256 are customizable versions of SHAKE128 and SHAKE256, allowing for domain separation and personalization through a customization string.
+
+```ruby
+# Create a new cSHAKE instance with a fixed output length
+cshake = SHA3::CSHAKE.new(:cshake_128, 32, name: 'my-app', customization: 'Email Signature')
+
+# Add data to hash
+cshake << 'Compute me...'
+
+# Get final output
+cshake.digest
+
+# Create a new cSHAKE instance for an arbitrarily-long (XOF) operation
+cshake = SHA3::CSHAKE.new(:cshake_256, 0, customization: 'Signature')
+
+# Add data to hash
+cshake.update('Beep Beep')
+
+# Squeeze 64-bytes of data from state
+cshake.squeeze(64)
+```
+
+### KMAC Functions
+
+KMAC (Keccak Message Authentication Code) is a message authentication code algorithm based on the SHAKE extendable-output functions:
+
+```ruby
+require 'sha3'
+
+# Create a new KMAC instance
+# Parameters: algorithm, output_length (in bytes), key, [customization] optional
+kmac = SHA3::KMAC.new(:kmac_128, 32, "my secret key", "app-specific customization")
+
+# Add data to be authenticated (update can be called multiple times)
+kmac.update("Authenticate this message")
+# or use the << operator
+kmac << "And this too"
+
+# Get the result as a hex string
+result = kmac.hexdigest
+# => "a8982c..."
+
+# Or as binary
+binary_result = kmac.digest
+
+# One-shot operation (customization is optional)
+# Parameters: algorithm, data, data, output_length (in bytes),key, [customization] optional
+result = SHA3::KMAC.hexdigest(:kmac_256, "message", 64, "key", "customization")
 ```
 
 ## Development
@@ -216,14 +241,16 @@ The test vectors are downloaded only once and cached in the `spec/data` director
 
 ### Supported Ruby Versions
 
-- MRI Ruby 2.7 - 3.1
+- MRI Ruby 2.7 - 3.4
 
 ## Roadmap
 
-- [X] Add support for SHA-3 variants (224, 256, 384, and 512 bit)
-- [X] Add support for SHAKE128 and SHAKE256 extendable-output functions (XOFs)
-- [X] Add support for KMAC
-- [ ] Add support for cSHAKE
+As of version 2.2.0 (2025), this gem is feature complete with a stable API—future updates will focus exclusively on performance improvements, security enhancements, and bug fixes.
+
+- [X] v0.Add support for SHA-3 variants (224, 256, 384, and 512 bit)
+- [X] 2.0.0: Add support for SHAKE128 and SHAKE256 extendable-output functions (XOFs)
+- [X] 2.1.0: Add support for KMAC
+- [X] 2.2.0: Add support for cSHAKE
 
 ## Contributing
 
