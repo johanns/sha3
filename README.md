@@ -172,9 +172,15 @@ cSHAKE128 and cSHAKE256 are customizable versions of SHAKE128 and SHAKE256, allo
 cshake = SHA3::CSHAKE.new(:cshake_128, 32, name: 'my-app', customization: 'Email Signature')
 
 # Add data to hash
+cshake.update('Hello')
+# Or use the << operator
 cshake << 'Compute me...'
 
-# Get final output
+# Get the final hash value as a hex string
+cshake.hexdigest
+# => "d6d38021d60857..."
+
+# Or as a binary string
 cshake.digest
 
 # Create a new cSHAKE instance for an arbitrarily-long (XOF) operation
@@ -194,7 +200,7 @@ KMAC (Keccak Message Authentication Code) is a message authentication code algor
 ```ruby
 require 'sha3'
 
-# Create a new KMAC instance
+# Create a new KMAC instance with a fixed output length
 # Parameters: algorithm, output_length (in bytes), key, [customization] optional
 kmac = SHA3::KMAC.new(:kmac_128, 32, "my secret key", "app-specific customization")
 
@@ -209,6 +215,20 @@ result = kmac.hexdigest
 
 # Or as binary
 binary_result = kmac.digest
+
+# Create a new KMAC instance with an arbitrary-length (XOF) operation
+kmac = SHA3::KMAC.new(:kmac_256, 0, "my secret key", "app-specific customization")
+
+# Add data to be authenticated (update can be called multiple times)
+kmac.update("Authenticate this message")
+# or use the << operator
+kmac << "And this too"
+
+# Get the result as a hex string
+result = kmac.hex_squeeze(128)
+
+# Or as binary
+binary_result = kmac.squeeze(128)
 
 # One-shot operation (customization is optional)
 # Parameters: algorithm, data, data, output_length (in bytes),key, [customization] optional
