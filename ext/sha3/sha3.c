@@ -1,5 +1,6 @@
 #include "sha3.h"
 
+#include "cshake.h"
 #include "digest.h"
 #include "kmac.h"
 
@@ -17,14 +18,17 @@ void Init_sha3_ext(void) {
      *
      * == Classes
      * SHA3::Digest
-     * SHA3::Digest::DigestError
+     * SHA3::Digest::Error
      * SHA3::KMAC
-     * SHA3::KMAC::KMACError
+     * SHA3::KMAC::Error
+     * SHA3::CSHAKE
+     * SHA3::CSHAKE::Error
      *
      */
     _sha3_module = rb_define_module("SHA3");
 
     Init_sha3_digest();
+    Init_sha3_cshake();
     Init_sha3_kmac();
 
     return;
