@@ -1,10 +1,7 @@
 // Copyright (c) 2012 - 2025 Johanns Gregorian <io+sha3@jsg.io>
 
-#ifndef _DIGEST_H_
-#define _DIGEST_H_
-
-#include <ruby.h>
-#include <ruby/encoding.h>
+#ifndef _SHA3_DIGEST_H_
+#define _SHA3_DIGEST_H_
 
 #ifdef __cplusplus
 extern "C" {
