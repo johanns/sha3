@@ -34,6 +34,7 @@ typedef HashReturn (*keccak_init_func)(Keccak_HashInstance *);
 static int compare_contexts(const sha3_digest_context_t *, const sha3_digest_context_t *);
 static inline void get_sha3_digest_context(VALUE, sha3_digest_context_t **);
 static inline void safe_get_sha3_digest_context(VALUE, sha3_digest_context_t **);
+static inline int is_shake_algorithm(sha3_digest_algorithms);
 
 static int get_hashbit_length(VALUE, sha3_digest_algorithms *);
 static HashReturn keccak_hash_initialize(sha3_digest_context_t *);
@@ -109,12 +110,12 @@ void Init_sha3_digest(void) {
      *
      * It is a subclass of the Digest::Class class, which provides a framework for
      * creating and manipulating hash digest. Supported Algorithms are:
-     * - SHA3-224
-     * - SHA3-256
-     * - SHA3-384
-     * - SHA3-512
-     * - SHAKE128
-     * - SHAKE256
+     * - SHA3-224 (:sha3_224)
+     * - SHA3-256 (:sha3_256)
+     * - SHA3-384 (:sha3_384)
+     * - SHA3-512 (:sha3_512)
+     * - SHAKE128 (:shake_128)
+     * - SHAKE256 (:shake_256)
      */
     _sha3_digest_class = rb_define_class_under(_sha3_module, "Digest", rb_path2class("Digest::Class"));
 
@@ -126,7 +127,7 @@ void Init_sha3_digest(void) {
      * It is a subclass of the StandardError class -- see the Ruby documentation
      * for more information.
      */
-    _sha3_digest_error_class = rb_define_class_under(_sha3_digest_class, "DigestError", rb_eStandardError);
+    _sha3_digest_error_class = rb_define_class_under(_sha3_digest_class, "Error", rb_eStandardError);
 
     rb_define_alloc_func(_sha3_digest_class, rb_sha3_digest_alloc);
     rb_define_method(_sha3_digest_class, "initialize", rb_sha3_digest_init, -1);
@@ -167,6 +168,8 @@ static inline void safe_get_sha3_digest_context(VALUE obj, sha3_digest_context_t
     get_sha3_digest_context(obj, context);
 }
 
+static inline int is_shake_algorithm(sha3_digest_algorithms alg) { return alg == SHAKE_128 || alg == SHAKE_256; }
+
 int get_hashbit_length(VALUE obj, sha3_digest_algorithms *algorithm) {
     if (TYPE(obj) == T_SYMBOL) {
         ID symid = SYM2ID(obj);
@@ -191,12 +194,13 @@ int get_hashbit_length(VALUE obj, sha3_digest_algorithms *algorithm) {
             return 256;
         }
 
-        rb_raise(_sha3_digest_error_class,
+        rb_raise(rb_eArgError,
                  "invalid hash algorithm symbol (should be: :sha3_224, "
                  ":sha3_256, :sha3_384, :sha3_512, :shake_128, or :shake_256)");
     }
 
     rb_raise(_sha3_digest_error_class, "unknown type value");
+
     return 0;  // Never reached, but silences compiler warnings
 }
 
@@ -568,7 +572,7 @@ static VALUE rb_sha3_digest_squeeze(VALUE self, VALUE length) {
     get_sha3_digest_context(self, &context);
 
     // Only SHAKE algorithms support arbitrary-length output
-    if (context->algorithm != SHAKE_128 && context->algorithm != SHAKE_256) {
+    if (!is_shake_algorithm(context->algorithm)) {
         rb_raise(_sha3_digest_error_class, "squeeze is only supported for SHAKE algorithms");
     }
 
@@ -614,6 +618,26 @@ static VALUE rb_sha3_digest_hex_squeeze(VALUE self, VALUE length) {
     return rb_funcall(bin_str, rb_intern("unpack1"), 1, rb_str_new2("H*"));
 }
 
+static VALUE prepare_shake_output(VALUE self, int argc, VALUE *argv, int hex_output) {
+    sha3_digest_context_t *context;
+    VALUE length, data;
+
+    get_sha3_digest_context(self, &context);
+    rb_scan_args(argc, argv, "02", &length, &data);
+
+    if (NIL_P(length)) {
+        rb_raise(_sha3_digest_error_class, "output length must be specified for SHAKE algorithms");
+    }
+
+    Check_Type(length, T_FIXNUM);
+
+    if (!NIL_P(data)) {
+        rb_sha3_digest_update(self, data);
+    }
+
+    return hex_output ? rb_sha3_digest_hex_squeeze(self, length) : rb_sha3_digest_squeeze(self, length);
+}
+
 /*
  * :call-seq:
  *   digest() -> string
@@ -644,23 +668,7 @@ static VALUE rb_sha3_digest_digest(int argc, VALUE *argv, VALUE self) {
         return rb_call_super(argc, argv);
     }
 
-    VALUE length, data;
-    rb_scan_args(argc, argv, "02", &length, &data);
-
-    // For SHAKE algorithms
-    if (NIL_P(length)) {
-        rb_raise(_sha3_digest_error_class, "output length must be specified for SHAKE algorithms");
-    }
-
-    // Add type checking for length
-    Check_Type(length, T_FIXNUM);
-
-    // If data is provided, update the state before squeezing
-    if (!NIL_P(data)) {
-        rb_sha3_digest_update(self, data);
-    }
-
-    return rb_sha3_digest_squeeze(self, length);
+    return prepare_shake_output(self, argc, argv, 0);
 }
 
 /*
@@ -693,22 +701,7 @@ static VALUE rb_sha3_digest_hexdigest(int argc, VALUE *argv, VALUE self) {
         return rb_call_super(argc, argv);
     }
 
-    VALUE length, data;
-    rb_scan_args(argc, argv, "02", &length, &data);
-
-    if (NIL_P(length)) {
-        rb_raise(_sha3_digest_error_class, "output length must be specified for SHAKE algorithms");
-    }
-
-    // Add type checking for length
-    Check_Type(length, T_FIXNUM);
-
-    // If data is provided, update the state before squeezing
-    if (!NIL_P(data)) {
-        rb_sha3_digest_update(self, data);
-    }
-
-    return rb_sha3_digest_hex_squeeze(self, length);
+    return prepare_shake_output(self, argc, argv, 1);
 }
 
 /*
@@ -738,6 +731,17 @@ static VALUE rb_sha3_digest_hexdigest(int argc, VALUE *argv, VALUE self) {
  * To squeeze a different length, use #squeeze instance method.
  */
 static VALUE rb_sha3_digest_self_digest(VALUE klass, VALUE name, VALUE data) {
+    // Add null checks
+    if (NIL_P(name) || NIL_P(data)) {
+        rb_raise(_sha3_digest_error_class, "algorithm name and data cannot be nil");
+    }
+
+    // Add type validation for name
+    if (TYPE(name) != T_SYMBOL) {
+        rb_raise(_sha3_digest_error_class, "algorithm name must be a symbol");
+    }
+
+    // Existing code...
     VALUE args[2];
 
     // Need to add type checking for the data parameter
