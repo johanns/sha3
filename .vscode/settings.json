@@ -1,0 +1,9 @@
+{
+    "files.associations": {
+        "sp800-185.h": "c",
+        "cshake.h": "c",
+        "bitset": "c",
+        "sp800_185.h": "c",
+        "keccakhash.h": "c"
+    }
+}

@@ -1,5 +1,20 @@
 # SHA3 Ruby Gem Changelog
 
+## v2.2.0 (2025-03-15)
+
+### Features
+- Added support for cSHAKE
+
+## v2.1.0 (2025-03-15)
+
+### Features
+- Added support for KMAC
+
+## v2.0.0 (2025-03-15)
+
+### Features
+- Added support for SHAKE128 and SHAKE256 extendable-output functions (XOFs)
+
 ## v1.0.5 (2022-10-23)
 
 ### Security

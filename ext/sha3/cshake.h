@@ -1,16 +1,17 @@
 // Copyright (c) 2012 - 2025 Johanns Gregorian <io+sha3@jsg.io>
 
-#ifndef _SHA3_DIGEST_H_
-#define _SHA3_DIGEST_H_
+#ifndef _SHA3_CSHAKE_H
+#define _SHA3_CSHAKE_H
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-extern void Init_sha3_digest(void);
+/* Function prototypes */
+void Init_sha3_cshake(void);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif
+#endif /* SHA3_CSHAKE_H */

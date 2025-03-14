@@ -6,7 +6,7 @@ RSpec.describe SHA3::KMAC do
   # Test vectors from NIST SP 800-185
   # https://csrc.nist.gov/CSRC/media/Projects/Cryptographic-Standards-and-Guidelines/documents/examples/KMAC_samples.pdf
 
-  TEST_VECTORS = [
+  KMAC_TEST_VECTORS = [
     {
       algorithm: :kmac_128,
       custom: '',
@@ -60,7 +60,7 @@ RSpec.describe SHA3::KMAC do
     end
 
     it 'raises an error for invalid algorithm' do
-      expect { described_class.new(:invalid_algo, 32, 'my key') }.to raise_error(SHA3::KMAC::KMACError)
+      expect { described_class.new(:invalid_algo, 32, 'my key') }.to raise_error(ArgumentError)
     end
 
     it 'requires the algorithm, output length, and key parameters' do
@@ -246,7 +246,7 @@ RSpec.describe SHA3::KMAC do
     end
   end
 
-  TEST_VECTORS.each do |vector|
+  KMAC_TEST_VECTORS.each do |vector|
     describe "test vector for #{vector[:description]}" do
       it 'produces the expected digest' do
         kmac = described_class.new(

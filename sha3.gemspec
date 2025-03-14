@@ -12,9 +12,9 @@ Gem::Specification.new do |spec|
   spec.description = <<~EOF
     A high-performance native binding to the SHA3 (FIPS 202) cryptographic hashing algorithms, based on the XKCP - eXtended Keccak Code Package.
     This gem provides support for the standard SHA-3 fixed-length functions (224, 256, 384, and 512 bits),
-    as well as the SHAKE128/SHAKE256 extendable-output functions (XOFs) and KMAC (Keccak Message Authentication Code) as specified in NIST SP 800-185.'
+    as well as the SHAKE128/SHAKE256 extendable-output functions (XOFs), cSHAKE128/256, and KMAC (Keccak Message Authentication Code) as specified in NIST SP 800-185.'
   EOF
-  spec.summary = 'SHA3 (FIPS 202) cryptographic hashing algorithms: SHA3-224/256/384/512, SHAKE128/256, and KMAC'
+  spec.summary = 'SHA3 (FIPS 202), SHAKE128/SHAKE256, CSHAKE128/256, and KMAC (NIST SP 800-185) for high-performance cryptographic hashing in Ruby, powered by the XKCP.'
 
   spec.homepage = 'https://github.com/johanns/sha3'
   spec.license = 'MIT'

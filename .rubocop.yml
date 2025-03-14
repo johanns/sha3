@@ -10,4 +10,4 @@ Layout/LineLength:
   Max: 120
 
 Naming/VariableNumber:
-  Enabled: false
+  EnforcedStyle: snake_case

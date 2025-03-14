@@ -12,6 +12,9 @@ dir_config(extension_name)
 # Set compiler flags
 $CFLAGS << ' -fomit-frame-pointer -O3 -g0 -fms-extensions'
 
+# Add vectorization flags for better performance on supported platforms
+$CFLAGS << ' -ftree-vectorize' if RUBY_PLATFORM =~ /x86_64|amd64|arm64/
+
 # Add architecture-specific optimizations if enabled
 $CFLAGS << ' -march=native' if enable_config('march-tune-native', false)
 
@@ -20,9 +23,6 @@ $CFLAGS << ' -D_FORTIFY_SOURCE=2 -fstack-protector-strong'
 
 # Add warning flags to catch potential issues
 $CFLAGS << ' -Wall -Wextra -Wformat -Wformat-security'
-
-# Add vectorization flags for better performance on supported platforms
-$CFLAGS << ' -ftree-vectorize' if RUBY_PLATFORM =~ /x86_64|amd64|arm64/
 
 # Find all relevant subdirectories and filter appropriately
 vpath_dirs = Dir.glob("#{$srcdir}/lib/**/*")
@@ -42,8 +42,14 @@ $INCFLAGS << vpath_dirs_processed
              .map { |dir| " -I$(srcdir)#{dir}" }
              .join
 
-# Base source files
-$srcs = ['digest.c', 'kmac.c', 'sha3.c']
+# Define source files
+$srcs = %w[
+  cshake.c
+  digest.c
+  kmac.c
+  sha3.c
+  sp800_185.c
+]
 
 # Find and add all .c files from the filtered directories
 $srcs += vpath_dirs
