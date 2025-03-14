@@ -198,8 +198,8 @@ RSpec.describe SHA3::Digest do
     describe 'SHAKE functionality' do
       it 'requires output length for SHAKE algorithms' do
         shake = described_class.new(:shake_128)
-        expect { shake.digest }.to raise_error(SHA3::Digest::DigestError)
-        expect { shake.hexdigest }.to raise_error(SHA3::Digest::DigestError)
+        expect { shake.digest }.to raise_error(SHA3::Digest::Error)
+        expect { shake.hexdigest }.to raise_error(SHA3::Digest::Error)
       end
 
       it 'produces variable length output for SHAKE algorithms' do
@@ -340,8 +340,8 @@ RSpec.describe 'SHA3::Digest::SHAxyz classes' do
     end
 
     it 'requires output length for digest methods' do
-      expect { SHA3::Digest::SHAKE_128.new.digest }.to raise_error(SHA3::Digest::DigestError)
-      expect { SHA3::Digest::SHAKE_256.new.hexdigest }.to raise_error(SHA3::Digest::DigestError)
+      expect { SHA3::Digest::SHAKE_128.new.digest }.to raise_error(SHA3::Digest::Error)
+      expect { SHA3::Digest::SHAKE_256.new.hexdigest }.to raise_error(SHA3::Digest::Error)
     end
 
     it 'provides class methods for direct hashing' do
