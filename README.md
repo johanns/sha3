@@ -146,7 +146,7 @@ SHAKE128 and SHAKE256 are extendable-output functions (XOFs) that allow you to "
 
 ```ruby
 # Create a new SHAKE128 instance
-shake = SHA3::Digest.new(:shake128)
+shake = SHA3::Digest::SHAKE_128.new
 
 # Add data to hash
 shake << 'Squeeze this data...'
@@ -247,7 +247,7 @@ The test vectors are downloaded only once and cached in the `spec/data` director
 
 As of version 2.2.0 (2025), this gem is feature complete with a stable API—future updates will focus exclusively on performance improvements, security enhancements, and bug fixes.
 
-- [X] v0.Add support for SHA-3 variants (224, 256, 384, and 512 bit)
+- [X] 0.1.0: Add support for SHA-3 variants (224, 256, 384, and 512 bit)
 - [X] 2.0.0: Add support for SHAKE128 and SHAKE256 extendable-output functions (XOFs)
 - [X] 2.1.0: Add support for KMAC
 - [X] 2.2.0: Add support for cSHAKE
