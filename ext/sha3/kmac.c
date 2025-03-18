@@ -427,6 +427,11 @@ static VALUE rb_sha3_kmac_self_digest(int argc, VALUE *argv, VALUE klass) {
 
     rb_scan_args(argc, argv, "41", &algorithm, &data, &output_length, &key, &customization);
 
+    Check_Type(output_length, T_FIXNUM);
+    if (!NIL_P(output_length) && output_length <= INT2FIX(0)) {
+        rb_raise(rb_eArgError, "class method digest does not support XOF mode");
+    }
+
     VALUE kmac = rb_funcall(klass, rb_intern("new"), 4, algorithm, output_length, key, customization);
 
     return rb_funcall(kmac, rb_intern("digest"), 1, data);
@@ -457,6 +462,11 @@ static VALUE rb_sha3_kmac_self_hexdigest(int argc, VALUE *argv, VALUE klass) {
     VALUE algorithm, data, output_length, key, customization;
 
     rb_scan_args(argc, argv, "41", &algorithm, &data, &output_length, &key, &customization);
+
+    Check_Type(output_length, T_FIXNUM);
+    if (!NIL_P(output_length) && output_length <= INT2FIX(0)) {
+        rb_raise(rb_eArgError, "class method hexdigest does not support XOF mode");
+    }
 
     VALUE kmac = rb_funcall(klass, rb_intern("new"), 4, algorithm, output_length, key, customization);
 
