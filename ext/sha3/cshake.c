@@ -348,10 +348,9 @@ static VALUE rb_sha3_cshake_hexdigest(int argc, VALUE *argv, VALUE self) {
     get_cshake_context(self, &context);
 
     VALUE data = argc > 0 ? argv[0] : Qnil;
-    
+
     return sp800_185_hexdigest(context, data);
 }
-
 
 /*
  * :call-seq:

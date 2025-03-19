@@ -2,8 +2,6 @@
 
 #include "sha3.h"
 
-
-
 /*** Function table for SP800-185 algorithms ***/
 sp800_185_function_table_t sp800_185_functions[] = {{.algorithm = SP800_185_CSHAKE_128,
                                                      .name = "CSHAKE128",
@@ -45,7 +43,7 @@ sp800_185_context_t *sp800_185_alloc_context(size_t context_size, size_t state_s
         return NULL;
     }
 
-    context->error_class = Qnil; // Initialize error class to nil
+    context->error_class = Qnil;  // Initialize error class to nil
 
     return context;
 }
