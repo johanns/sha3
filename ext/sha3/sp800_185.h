@@ -20,8 +20,8 @@ typedef enum {
 } sp800_185_algorithm_t;
 
 /* Common function pointer typedefs for SP800-185 algorithms */
-typedef int (*sp800_185_init_fn)(void *state, size_t capacity, const BitSequence *N, size_t NLen,
-                                 const BitSequence *S, size_t SLen);
+typedef int (*sp800_185_init_fn)(void *state, size_t capacity, const BitSequence *N, size_t NLen, const BitSequence *S,
+                                 size_t SLen);
 
 typedef int (*sp800_185_init_key_fn)(void *state, const BitSequence *key, BitLength keyBitLen, BitLength outputBitLen,
                                      const BitSequence *customization, BitLength customBitLen);
