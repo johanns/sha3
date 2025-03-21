@@ -77,16 +77,6 @@ VALUE sp800_185_squeeze(sp800_185_context_t *context, VALUE length);
 VALUE sp800_185_hex_squeeze(sp800_185_context_t *context, VALUE length);
 const char *sp800_185_name(sp800_185_context_t *context);
 
-// Macro to define common Ruby methods
-#define DEFINE_SP800_185_METHOD(name) static VALUE rb_sp800_185_##name(int argc, VALUE *argv, VALUE self);
-
-DEFINE_SP800_185_METHOD(update)
-DEFINE_SP800_185_METHOD(finish)
-DEFINE_SP800_185_METHOD(digest)
-DEFINE_SP800_185_METHOD(hexdigest)
-DEFINE_SP800_185_METHOD(squeeze)
-DEFINE_SP800_185_METHOD(hex_squeeze)
-
 #ifdef __cplusplus
 }
 #endif
