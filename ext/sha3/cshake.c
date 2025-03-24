@@ -179,15 +179,15 @@ static VALUE rb_sha3_cshake_init(int argc, VALUE *argv, VALUE self) {
         rb_intern("customization"),
     };
 
-    VALUE values[3];
-    rb_get_kwargs(keywords, table, 0, 3, values);
+    VALUE values[2];
+    rb_get_kwargs(keywords, table, 0, 2, values);
 
     VALUE name_str = values[0] == Qundef ? rb_str_new2("") : values[0];
     StringValue(name_str);
 
     VALUE customization = values[1] == Qundef ? rb_str_new2("") : values[1];
     StringValue(customization);
-
+    
     sha3_cshake_context_t *context;
     TypedData_Get_Struct(self, sha3_cshake_context_t, &sha3_cshake_data_type, context);
 
