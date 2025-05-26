@@ -42,10 +42,9 @@ static ID _cshake_256_id;
 static const rb_data_type_t sha3_cshake_data_type = {
     "SHA3::CSHAKE",
     {
-        NULL,
-        sha3_cshake_free_context,  // Use our free function directly
-        sha3_cshake_context_size,  /* We'll do our own size calculation */
-        NULL,                      /* dcompact field */
+        NULL, sha3_cshake_free_context,  // Use our free function directly
+        sha3_cshake_context_size,        /* We'll do our own size calculation */
+        NULL,                            /* dcompact field */
     },
     NULL,
     NULL,
@@ -187,7 +186,7 @@ static VALUE rb_sha3_cshake_init(int argc, VALUE *argv, VALUE self) {
 
     VALUE customization = values[1] == Qundef ? rb_str_new2("") : values[1];
     StringValue(customization);
-    
+
     sha3_cshake_context_t *context;
     TypedData_Get_Struct(self, sha3_cshake_context_t, &sha3_cshake_data_type, context);
 
@@ -196,18 +195,24 @@ static VALUE rb_sha3_cshake_init(int argc, VALUE *argv, VALUE self) {
     context->base.error_class = _sha3_cshake_error_class;
 
     // Find the appropriate function table based on the algorithm
+    sp800_185_algorithm_t alg_type;
     if (algorithm == ID2SYM(_cshake_128_id)) {
-        context->base.functions = &sp800_185_functions[SP800_185_CSHAKE_128];
+        alg_type = SP800_185_CSHAKE_128;
     } else if (algorithm == ID2SYM(_cshake_256_id)) {
-        context->base.functions = &sp800_185_functions[SP800_185_CSHAKE_256];
+        alg_type = SP800_185_CSHAKE_256;
     } else {
         rb_raise(rb_eArgError, "invalid algorithm: %s", rb_id2name(SYM2ID(algorithm)));
     }
 
-    // Initialize the state using the function table
-    int result = context->base.functions->cshake.init(
-        context->base.state, context->base.output_length, (BitSequence *)RSTRING_PTR(name_str),
-        RSTRING_LEN(name_str) * 8, (BitSequence *)RSTRING_PTR(customization), RSTRING_LEN(customization) * 8);
+    context->base.functions = sp800_185_get_algorithm(alg_type);
+    if (!context->base.functions) {
+        rb_raise(_sha3_cshake_error_class, "algorithm not available");
+    }
+
+    // Initialize using the safe accessor function
+    int result = sp800_185_init_cshake(context->base.functions, context->base.state, context->base.output_length,
+                                       (BitSequence *)RSTRING_PTR(name_str), RSTRING_LEN(name_str) * 8,
+                                       (BitSequence *)RSTRING_PTR(customization), RSTRING_LEN(customization) * 8);
 
     if (result != 0) {
         rb_raise(_sha3_cshake_error_class, "failed to initialize %s algorithm", context->base.functions->name);

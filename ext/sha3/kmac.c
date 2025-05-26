@@ -70,18 +70,15 @@ void Init_sha3_kmac(void) {
     /*
      * Document-class: SHA3::KMAC
      *
-     * It is a subclass of the Digest::Class class, which provides a framework for
-     * creating and manipulating hash digests.
+     * KMAC (Keccak Message Authentication Code) is a MAC algorithm based on the Keccak permutation.
+     * It is defined in NIST SP800-185 and provides both fixed-length and XOF (arbitrary-length) output modes.
      */
     _sha3_kmac_class = rb_define_class_under(_sha3_module, "KMAC", rb_cObject);
 
     /*
-     * Document-class: SHA3::KMAC::KMACError
+     * Document-class: SHA3::KMAC::Error
      *
      * All KMAC methods raise this exception on error.
-     *
-     * It is a subclass of the StandardError class -- see the Ruby documentation
-     * for more information.
      */
     _sha3_kmac_error_class = rb_define_class_under(_sha3_kmac_class, "Error", rb_eStandardError);
 
@@ -190,21 +187,28 @@ static VALUE rb_sha3_kmac_init(int argc, VALUE *argv, VALUE self) {
 
     // Find the appropriate function table based on the algorithm
     ID sym_id = SYM2ID(algorithm);
+    sp800_185_algorithm_t alg_type;
+
     if (sym_id == _kmac_128_id) {
-        context->base.functions = &sp800_185_functions[SP800_185_KMAC_128];
+        alg_type = SP800_185_KMAC_128;
     } else if (sym_id == _kmac_256_id) {
-        context->base.functions = &sp800_185_functions[SP800_185_KMAC_256];
+        alg_type = SP800_185_KMAC_256;
     } else {
         rb_raise(rb_eArgError, "invalid algorithm: %s", rb_id2name(sym_id));
     }
 
-    // Initialize the KMAC instance
+    context->base.functions = sp800_185_get_algorithm(alg_type);
+    if (!context->base.functions) {
+        rb_raise(_sha3_kmac_error_class, "algorithm not available: %s", rb_id2name(sym_id));
+    }
+
+    // Initialize using the safe accessor function
     size_t key_len = RSTRING_LEN(key) * 8;
     size_t customization_len = RSTRING_LEN(customization) * 8;
 
-    int result = context->base.functions->kmac.init(context->base.state, (const BitSequence *)RSTRING_PTR(key), key_len,
-                                                    context->base.output_length,
-                                                    (const BitSequence *)RSTRING_PTR(customization), customization_len);
+    int result = sp800_185_init_kmac(context->base.functions, context->base.state,
+                                     (const BitSequence *)RSTRING_PTR(key), key_len, context->base.output_length,
+                                     (const BitSequence *)RSTRING_PTR(customization), customization_len);
 
     if (result != 0) {
         rb_raise(_sha3_kmac_error_class, "failed to initialize %s", context->base.functions->name);
