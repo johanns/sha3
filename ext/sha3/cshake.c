@@ -168,8 +168,9 @@ static VALUE rb_sha3_cshake_init(int argc, VALUE *argv, VALUE self) {
         rb_raise(rb_eArgError, "missing keyword: length");
     }
     Check_Type(length, T_FIXNUM);
+    long len_check = NUM2LONG(length);
 
-    if (NUM2INT(length) < 0) {
+    if (len_check < 0) {
         rb_raise(rb_eArgError, "output length must be non-negative");
     }
 
@@ -191,7 +192,7 @@ static VALUE rb_sha3_cshake_init(int argc, VALUE *argv, VALUE self) {
     TypedData_Get_Struct(self, sha3_cshake_context_t, &sha3_cshake_data_type, context);
 
     // Store the output length in bits
-    context->base.output_length = NUM2INT(length) * 8;
+    context->base.output_length = (size_t)len_check * 8;
     context->base.error_class = _sha3_cshake_error_class;
 
     // Find the appropriate function table based on the algorithm

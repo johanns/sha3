@@ -560,12 +560,12 @@ static VALUE rb_sha3_digest_finish(int argc, VALUE *argv, VALUE self) {
 static VALUE rb_sha3_digest_squeeze(VALUE self, VALUE length) {
     sha3_digest_context_t *context;
     VALUE str, copy;
-    int output_bytes;
+    size_t output_bytes;
 
     Check_Type(length, T_FIXNUM);
-    output_bytes = NUM2INT(length);
+    output_bytes = NUM2SIZET(length);
 
-    if (output_bytes <= 0) {
+    if (output_bytes == 0) {
         rb_raise(_sha3_digest_error_class, "output length must be positive");
     }
 
