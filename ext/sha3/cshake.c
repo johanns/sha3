@@ -151,7 +151,7 @@ static VALUE rb_sha3_cshake_alloc(VALUE klass) {
  *
  *   # Initialize instance for XOF operation (arbitrary-long output)
  *   cshake = SHA3::CSHAKE.new(:cshake_256, 0, customization: 'Email Signature')
- *   cshask.update('data...')
+ *   cshake.update('data...')
  *   cshake.squeeze(64)
  */
 static VALUE rb_sha3_cshake_init(int argc, VALUE *argv, VALUE self) {
