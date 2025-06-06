@@ -192,6 +192,9 @@ static VALUE rb_sha3_cshake_init(int argc, VALUE *argv, VALUE self) {
     TypedData_Get_Struct(self, sha3_cshake_context_t, &sha3_cshake_data_type, context);
 
     // Store the output length in bits
+    if (len_check > SIZE_MAX / 8) {
+        rb_raise(rb_eArgError, "output length too large: %zu", len_check);
+    }
     context->base.output_length = (size_t)len_check * 8;
     context->base.error_class = _sha3_cshake_error_class;
 
