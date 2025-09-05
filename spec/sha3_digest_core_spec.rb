@@ -65,7 +65,10 @@ RSpec.describe SHA3::Digest do
 
     # Test handling of large inputs (CVE protection)
     describe 'handling large inputs' do
-      it 'correctly processes inputs near the 32-bit boundary' do
+      # This test verifies CVE protection for integer overflow/large input handling
+      # Run with: bundle exec rspec --tag slow_cve
+      # Or with environment: RUN_SLOW_TESTS=1 bundle exec rspec
+      it 'correctly processes inputs near the 32-bit boundary', :slow_cve do
         # Test with SHA3-224 algorithm
         sha = described_class.new(:sha3_224)
 
@@ -275,6 +278,114 @@ RSpec.describe SHA3::Digest do
         expect(copy.name).to eq(original.name)
         expect(copy.digest_length).to eq(original.digest_length)
       end
+    end
+  end
+
+  # Test .digest and .hexdigest class methods
+  describe 'class methods' do
+    let(:test_data) { 'test data' }
+
+    it 'provides .digest method for SHA3 algorithms' do
+      # Test that class method produces same result as instance method
+      instance = described_class.new(:sha3_256, test_data)
+      class_result = described_class.digest(:sha3_256, test_data)
+
+      expect(class_result).to eq(instance.digest)
+      expect(class_result).to be_a(String)
+      expect(class_result.bytesize).to eq(32)
+    end
+
+    it 'provides .hexdigest method for SHA3 algorithms' do
+      # Test that class method produces same result as instance method
+      instance = described_class.new(:sha3_256, test_data)
+      class_result = described_class.hexdigest(:sha3_256, test_data)
+
+      expect(class_result).to eq(instance.hexdigest)
+      expect(class_result).to be_a(String)
+      expect(class_result.length).to eq(64)
+    end
+
+    it 'works with SHA3::Digest.hexdigest(:sha3_256, "foobar")' do
+      # Specific test case requested by user
+      result = described_class.hexdigest(:sha3_256, 'foobar')
+
+      # Verify it matches the expected SHA3-256 hash of 'foobar'
+      instance = described_class.new(:sha3_256, 'foobar')
+      expect(result).to eq(instance.hexdigest)
+
+      # Also verify the actual hash value
+      expect(result).to eq('09234807e4af85f17c66b48ee3bca89dffd1f1233659f9f940a2b17b0b8c6bc5')
+    end
+
+    it 'works with SHA3::Digest.digest(:sha3_256, "blah blah")' do
+      # Specific test case requested by user
+      result = described_class.digest(:sha3_256, 'blah blah')
+
+      # Verify it matches instance method result
+      instance = described_class.new(:sha3_256, 'blah blah')
+      expect(result).to eq(instance.digest)
+
+      # Verify it's binary and has correct length
+      expect(result).to be_a(String)
+      expect(result.encoding).to eq(Encoding::ASCII_8BIT)
+      expect(result.bytesize).to eq(32)
+
+      # Verify the hex representation matches
+      hex_result = result.unpack1('H*')
+      expect(hex_result).to eq(instance.hexdigest)
+    end
+
+    it 'handles all SHA3 algorithms correctly' do
+      algorithms = {
+        sha3_224: 28,
+        sha3_256: 32,
+        sha3_384: 48,
+        sha3_512: 64
+      }
+
+      algorithms.each do |algo, expected_bytes|
+        digest_result = described_class.digest(algo, test_data)
+        hexdigest_result = described_class.hexdigest(algo, test_data)
+
+        # Compare with instance methods
+        instance = described_class.new(algo, test_data)
+        expect(digest_result).to eq(instance.digest)
+        expect(hexdigest_result).to eq(instance.hexdigest)
+
+        # Check sizes
+        expect(digest_result.bytesize).to eq(expected_bytes)
+        expect(hexdigest_result.length).to eq(expected_bytes * 2)
+      end
+    end
+
+    it 'handles SHAKE algorithms with default output length' do
+      # SHAKE128 defaults to 128 bits (16 bytes), SHAKE256 defaults to 256 bits (32 bytes)
+      shake256_result = described_class.digest(:shake_256, test_data)
+      expect(shake256_result.bytesize).to eq(32)
+
+      shake128_result = described_class.digest(:shake_128, test_data)
+      expect(shake128_result.bytesize).to eq(16) # 128 bits = 16 bytes
+
+      # hexdigest follows the same pattern
+      shake256_hex_result = described_class.hexdigest(:shake_256, test_data)
+      expect(shake256_hex_result.length).to eq(64)  # 32 bytes = 64 hex chars
+
+      shake128_hex_result = described_class.hexdigest(:shake_128, test_data)
+      expect(shake128_hex_result.length).to eq(32)  # 16 bytes = 32 hex chars
+
+      # Verify they match what instance methods would produce
+      instance256 = described_class.new(:shake_256, test_data)
+      expect(shake256_result).to eq(instance256.digest(32))
+      expect(shake256_hex_result).to eq(instance256.hexdigest(32))
+
+      instance128 = described_class.new(:shake_128, test_data)
+      expect(shake128_result).to eq(instance128.digest(16))
+      expect(shake128_hex_result).to eq(instance128.hexdigest(16))
+    end
+
+    it 'raises an error for unsupported algorithms' do
+      expect { described_class.digest(:unsupported_algorithm, test_data) }.to raise_error(ArgumentError)
+      expect { described_class.hexdigest(:unsupported_algorithm, test_data) }.to raise_error(ArgumentError)
     end
   end
 end

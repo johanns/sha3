@@ -4,49 +4,62 @@ require 'spec_helper'
 
 require 'sha3'
 
+# Test vectors from NIST SP 800-185
+# https://csrc.nist.gov/CSRC/media/Projects/Cryptographic-Standards-and-Guidelines/documents/examples/cSHAKE_samples.pdf
+CSHAKE_TEST_VECTORS = [
+  {
+    algorithm: :cshake_128,
+    name: '',
+    customization: 'Email Signature',
+    data: '00010203',
+    description: 'cSHAKE128 Non-Empty Customization',
+    hex_output: 'c1c36925b6409a04f1b504fcbca9d82b4017277cb5ed2b2065fc1d3814d5aaf5',
+    length: 32
+  },
+  {
+    algorithm: :cshake_128,
+    name: '',
+    customization: 'Email Signature',
+    data: '000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f' \
+          '202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f' \
+          '404142434445464748494a4b4c4d4e4f505152535455565758595a5b5c5d5e5f' \
+          '606162636465666768696a6b6c6d6e6f707172737475767778797a7b7c7d7e7f' \
+          '808182838485868788898a8b8c8d8e8f909192939495969798999a9b9c9d9e9f' \
+          'a0a1a2a3a4a5a6a7a8a9aaabacadaeafb0b1b2b3b4b5b6b7b8b9babbbcbdbebf' \
+          'c0c1c2c3c4c5c6c7',
+    description: 'cSHAKE128 Non-Empty Customization Long Data',
+    hex_output: 'c5221d50e4f822d96a2e8881a961420f294b7b24fe3d2094baed2c6524cc166b',
+    length: 32
+  },
+  {
+    algorithm: :cshake_256,
+    name: '',
+    customization: 'Email Signature',
+    data: '00010203',
+    description: 'cSHAKE256 Non-Empty Customization',
+    hex_output: 'd008828e2b80ac9d2218ffee1d070c48b8e4c87bff32c9699d5b6896eee0edd1' \
+                '64020e2be0560858d9c00c037e34a96937c561a74c412bb4c746469527281c8c',
+    length: 64
+  },
+  {
+    algorithm: :cshake_256,
+    name: '',
+    customization: 'Email Signature',
+    data: '000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f' \
+          '202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f' \
+          '404142434445464748494a4b4c4d4e4f505152535455565758595a5b5c5d5e5f' \
+          '606162636465666768696a6b6c6d6e6f707172737475767778797a7b7c7d7e7f' \
+          '808182838485868788898a8b8c8d8e8f909192939495969798999a9b9c9d9e9f' \
+          'a0a1a2a3a4a5a6a7a8a9aaabacadaeafb0b1b2b3b4b5b6b7b8b9babbbcbdbebf' \
+          'c0c1c2c3c4c5c6c7',
+    description: 'cSHAKE256 Non-Empty Customization Long Data',
+    hex_output: '07dc27b11e51fbac75bc7b3c1d983e8b4b85fb1defaf218912ac864302730917' \
+                '27f42b17ed1df63e8ec118f04b23633c1dfb1574c8fb55cb45da8e25afb092bb',
+    length: 64
+  }
+].freeze
+
 RSpec.describe SHA3::CSHAKE do
-  # Test vectors from NIST SP 800-185
-  # https://csrc.nist.gov/CSRC/media/Projects/Cryptographic-Standards-and-Guidelines/documents/examples/cSHAKE_samples.pdf
-
-  CSHAKE_TEST_VECTORS = [
-    {
-      algorithm: :cshake_128,
-      name: '',
-      customization: 'Email Signature',
-      data: '00010203',
-      description: 'cSHAKE128 Non-Empty Customization',
-      hex_output: 'c1c36925b6409a04f1b504fcbca9d82b4017277cb5ed2b2065fc1d3814d5aaf5',
-      length: 32
-    },
-    {
-      algorithm: :cshake_128,
-      name: '',
-      customization: 'Email Signature',
-      data: '000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f404142434445464748494a4b4c4d4e4f505152535455565758595a5b5c5d5e5f606162636465666768696a6b6c6d6e6f707172737475767778797a7b7c7d7e7f808182838485868788898a8b8c8d8e8f909192939495969798999a9b9c9d9e9fa0a1a2a3a4a5a6a7a8a9aaabacadaeafb0b1b2b3b4b5b6b7b8b9babbbcbdbebfc0c1c2c3c4c5c6c7',
-      description: 'cSHAKE128 Non-Empty Customization Long Data',
-      hex_output: 'c5221d50e4f822d96a2e8881a961420f294b7b24fe3d2094baed2c6524cc166b',
-      length: 32
-    },
-    {
-      algorithm: :cshake_256,
-      name: '',
-      customization: 'Email Signature',
-      data: '00010203',
-      description: 'cSHAKE256 Non-Empty Customization',
-      hex_output: 'd008828e2b80ac9d2218ffee1d070c48b8e4c87bff32c9699d5b6896eee0edd164020e2be0560858d9c00c037e34a96937c561a74c412bb4c746469527281c8c',
-      length: 64
-    },
-    {
-      algorithm: :cshake_256,
-      name: '',
-      customization: 'Email Signature',
-      data: '000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f404142434445464748494a4b4c4d4e4f505152535455565758595a5b5c5d5e5f606162636465666768696a6b6c6d6e6f707172737475767778797a7b7c7d7e7f808182838485868788898a8b8c8d8e8f909192939495969798999a9b9c9d9e9fa0a1a2a3a4a5a6a7a8a9aaabacadaeafb0b1b2b3b4b5b6b7b8b9babbbcbdbebfc0c1c2c3c4c5c6c7',
-      description: 'cSHAKE256 Non-Empty Customization Long Data',
-      hex_output: '07dc27b11e51fbac75bc7b3c1d983e8b4b85fb1defaf218912ac86430273091727f42b17ed1df63e8ec118f04b23633c1dfb1574c8fb55cb45da8e25afb092bb',
-      length: 64
-    }
-  ].freeze
-
   describe '.new' do
     it 'initializes with required parameters' do
       expect { described_class.new(:cshake_128, 32) }.not_to raise_error

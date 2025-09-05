@@ -5,24 +5,24 @@ require 'sha3'
 require 'fileutils'
 require 'open-uri'
 
+# Test vector URLs
+VECTOR_URLS = {
+  sha3_224: 'https://raw.githubusercontent.com/XKCP/XKCP/master/tests/TestVectors/ShortMsgKAT_SHA3-224.txt',
+  sha3_256: 'https://raw.githubusercontent.com/XKCP/XKCP/master/tests/TestVectors/ShortMsgKAT_SHA3-256.txt',
+  sha3_384: 'https://raw.githubusercontent.com/XKCP/XKCP/master/tests/TestVectors/ShortMsgKAT_SHA3-384.txt',
+  sha3_512: 'https://raw.githubusercontent.com/XKCP/XKCP/master/tests/TestVectors/ShortMsgKAT_SHA3-512.txt',
+  shake_128: 'https://raw.githubusercontent.com/XKCP/XKCP/master/tests/TestVectors/ShortMsgKAT_SHAKE128.txt',
+  shake_256: 'https://raw.githubusercontent.com/XKCP/XKCP/master/tests/TestVectors/ShortMsgKAT_SHAKE256.txt'
+}.freeze
+
+# Output length for SHAKE algorithms in bits (as specified in the test vectors)
+SHAKE_OUTPUT_LENGTH = 512
+
+# Algorithm families
+SHA3_ALGORITHMS = %i[sha3_224 sha3_256 sha3_384 sha3_512].freeze
+SHAKE_ALGORITHMS = %i[shake_128 shake_256].freeze
+
 RSpec.describe SHA3::Digest do
-  # Test vector URLs
-  VECTOR_URLS = {
-    sha3_224: 'https://raw.githubusercontent.com/XKCP/XKCP/master/tests/TestVectors/ShortMsgKAT_SHA3-224.txt',
-    sha3_256: 'https://raw.githubusercontent.com/XKCP/XKCP/master/tests/TestVectors/ShortMsgKAT_SHA3-256.txt',
-    sha3_384: 'https://raw.githubusercontent.com/XKCP/XKCP/master/tests/TestVectors/ShortMsgKAT_SHA3-384.txt',
-    sha3_512: 'https://raw.githubusercontent.com/XKCP/XKCP/master/tests/TestVectors/ShortMsgKAT_SHA3-512.txt',
-    shake_128: 'https://raw.githubusercontent.com/XKCP/XKCP/master/tests/TestVectors/ShortMsgKAT_SHAKE128.txt',
-    shake_256: 'https://raw.githubusercontent.com/XKCP/XKCP/master/tests/TestVectors/ShortMsgKAT_SHAKE256.txt'
-  }.freeze
-
-  # Output length for SHAKE algorithms in bits (as specified in the test vectors)
-  SHAKE_OUTPUT_LENGTH = 512
-
-  # Algorithm families
-  SHA3_ALGORITHMS = %i[sha3_224 sha3_256 sha3_384 sha3_512].freeze
-  SHAKE_ALGORITHMS = %i[shake_128 shake_256].freeze
-
   # Path to test vectors data directory
   let(:data_dir) { File.join(File.dirname(__FILE__), 'data') }
 
@@ -71,7 +71,9 @@ RSpec.describe SHA3::Digest do
         File.binwrite(vector_file, URI.open(url, open_timeout: 10, read_timeout: 20).read)
       rescue OpenURI::HTTPError, SocketError => e
         warn "Failed to download #{hash_type} test vectors: #{e.message}"
-        raise "Test vector download failed. Please check your internet connection or manually download the file to #{vector_file}"
+        error_msg = 'Test vector download failed. Please check your internet connection '
+        error_msg += "or manually download the file to #{vector_file}"
+        raise error_msg
       end
     end
 
