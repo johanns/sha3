@@ -6,8 +6,74 @@ AllCops:
   NewCops: enable
   TargetRubyVersion: 2.7
 
+  Exclude:
+    - ext/**/*.rb
+
 Layout/LineLength:
   Max: 120
 
+# Metrics
+
+Metrics/AbcSize:
+  Exclude:
+    - spec/**/*_spec.rb
+
+Metrics/CyclomaticComplexity:
+  Exclude:
+    - spec/**/*_spec.rb
+
+Metrics/PerceivedComplexity:
+  Exclude:
+    - spec/**/*_spec.rb
+
+Metrics/MethodLength:
+  Max: 15
+  Exclude:
+    - spec/**/*_spec.rb
+
+# Naming
+
+Naming/ClassAndModuleCamelCase:
+  Enabled: false
+
 Naming/VariableNumber:
   EnforcedStyle: snake_case
+  Exclude:
+    - spec/**/*.rb
+
+# Security
+
+# Allow URI.open for test vector downloads
+Security/Open:
+  Exclude:
+    - spec/sha3_digest_vectors_spec.rb
+
+# RSpec configuration
+
+RSpec/ExampleLength:
+  Max: 15
+  CountAsOne:
+    - array
+    - hash
+    - heredoc
+
+RSpec/MultipleExpectations:
+  Max: 8
+
+RSpec/SpecFilePathFormat:
+  Enabled: false
+
+RSpec/LeakyConstantDeclaration:
+  Enabled: false
+
+RSpec/BeforeAfterAll:
+  Enabled: false
+
+RSpec/MultipleDescribes:
+  Enabled: false
+
+RSpec/NamedSubject:
+  Enabled: false
+
+RSpec/DescribeClass:
+  Enabled: false
