@@ -1,5 +1,6 @@
 #include "cshake.h"
 
+#include "common.h"
 #include "sha3.h"
 #include "sp800_185.h"
 
@@ -76,7 +77,7 @@ void Init_sha3_cshake(void) {
     /*
      * Document-class: SHA3::CSHAKE::Error
      *
-     * All KMAC methods raise this exception on error.
+     * All CSHAKE methods raise this exception on error.
      *
      * It is a subclass of the StandardError class -- see the Ruby documentation
      * for more information.
@@ -104,25 +105,11 @@ void Init_sha3_cshake(void) {
     return;
 }
 
-static void sha3_cshake_free_context(void *ptr) { sp800_185_free_context((sp800_185_context_t *)ptr); }
+/* Use common memory management functions */
+DEFINE_SP800_185_MEMORY_FUNCS(sha3_cshake, sha3_cshake_context_t)
 
-static size_t sha3_cshake_context_size(const void *ptr) {
-    return sp800_185_context_size((const sp800_185_context_t *)ptr, sizeof(sha3_cshake_context_t));
-}
-
-static VALUE rb_sha3_cshake_alloc(VALUE klass) {
-    sha3_cshake_context_t *context =
-        (sha3_cshake_context_t *)sp800_185_alloc_context(sizeof(sha3_cshake_context_t), sizeof(cSHAKE_Instance));
-
-    if (!context) {
-        rb_raise(_sha3_cshake_error_class, "failed to allocate memory");
-    }
-
-    // Create the Ruby object with TypedData - this will automatically handle freeing
-    VALUE obj = TypedData_Wrap_Struct(klass, &sha3_cshake_data_type, context);
-
-    return obj;
-}
+/* Use common allocation function */
+DEFINE_SP800_185_ALLOC(sha3_cshake, sha3_cshake_context_t, cSHAKE_Instance, _sha3_cshake_error_class)
 
 /*
  * :call-seq:
@@ -144,7 +131,7 @@ static VALUE rb_sha3_cshake_alloc(VALUE klass) {
  *   _optional_ The customization string to use
  *
  * = example
- *   # Initialize instance for fix-ed-length operation
+ *   # Initialize instance for fixed-length operation
  *   cshake = SHA3::CSHAKE.new(:cshake_128, 32, name: 'my-app')
  *   cshake << 'data...'
  *   cshake.hexdigest
@@ -233,31 +220,7 @@ static VALUE rb_sha3_cshake_init(int argc, VALUE *argv, VALUE self) {
  * = example
  *  cshake2 = cshake.dup
  */
-static VALUE rb_sha3_cshake_copy(VALUE self, VALUE other) {
-    sha3_cshake_context_t *context, *other_context;
-
-    rb_check_frozen(self);
-    if (self == other) {
-        return self;
-    }
-
-    if (!rb_obj_is_kind_of(other, _sha3_cshake_class)) {
-        rb_raise(rb_eTypeError, "wrong argument (%s)! (expected %s)", rb_obj_classname(other),
-                 rb_class2name(_sha3_cshake_class));
-    }
-
-    TypedData_Get_Struct(other, sha3_cshake_context_t, &sha3_cshake_data_type, other_context);
-    TypedData_Get_Struct(self, sha3_cshake_context_t, &sha3_cshake_data_type, context);
-
-    // Copy the base context attributes
-    context->base.functions = other_context->base.functions;
-    context->base.output_length = other_context->base.output_length;
-
-    // Copy the algorithm-specific state
-    memcpy(context->base.state, other_context->base.state, context->base.functions->state_size);
-
-    return self;
-}
+DEFINE_SP800_185_COPY_METHOD(rb_sha3_cshake_copy, sha3_cshake_context_t, sha3_cshake_data_type, _sha3_cshake_class)
 
 /*
  * :call-seq:
@@ -272,13 +235,7 @@ static VALUE rb_sha3_cshake_copy(VALUE self, VALUE other) {
  *   cshake.update("more data")
  *   cshake << "more data"  # alias for update
  */
-static VALUE rb_sha3_cshake_update(VALUE self, VALUE data) {
-    sp800_185_context_t *context;
-    get_cshake_context(self, &context);
-    sp800_185_update(context, data);
-
-    return self;
-}
+DEFINE_SP800_185_SIMPLE_METHOD(rb_sha3_cshake_update, sp800_185_rb_update, get_cshake_context)
 
 /*
  * :call-seq:
@@ -286,12 +243,7 @@ static VALUE rb_sha3_cshake_update(VALUE self, VALUE data) {
  *
  * Returns the name of the CSHAKE instance.
  */
-static VALUE rb_sha3_cshake_name(VALUE self) {
-    sp800_185_context_t *context;
-    get_cshake_context(self, &context);
-
-    return rb_str_new2(sp800_185_name(context));
-}
+DEFINE_SP800_185_RETURN_METHOD(rb_sha3_cshake_name, sp800_185_rb_name, get_cshake_context)
 
 /*
  * :call-seq:
@@ -305,13 +257,7 @@ static VALUE rb_sha3_cshake_name(VALUE self) {
  * = example
  *   cshake.finish
  */
-static VALUE rb_sha3_cshake_finish(int argc, VALUE *argv, VALUE self) {
-    sp800_185_context_t *context;
-    get_cshake_context(self, &context);
-
-    VALUE output = argc > 0 ? argv[0] : Qnil;
-    return sp800_185_finish(context, output);
-}
+DEFINE_SP800_185_VARARGS_METHOD(rb_sha3_cshake_finish, sp800_185_rb_finish, get_cshake_context)
 
 /*
  * :call-seq:
@@ -326,14 +272,7 @@ static VALUE rb_sha3_cshake_finish(int argc, VALUE *argv, VALUE self) {
  *   cshake.digest
  *   cshake.digest("final chunk")
  */
-static VALUE rb_sha3_cshake_digest(int argc, VALUE *argv, VALUE self) {
-    sp800_185_context_t *context;
-    get_cshake_context(self, &context);
-
-    VALUE data = argc > 0 ? argv[0] : Qnil;
-
-    return sp800_185_digest(context, data);
-}
+DEFINE_SP800_185_VARARGS_METHOD(rb_sha3_cshake_digest, sp800_185_rb_digest, get_cshake_context)
 
 /*
  * :call-seq:
@@ -348,14 +287,7 @@ static VALUE rb_sha3_cshake_digest(int argc, VALUE *argv, VALUE self) {
  *   cshake.hexdigest
  *   cshake.hexdigest("final chunk")
  */
-static VALUE rb_sha3_cshake_hexdigest(int argc, VALUE *argv, VALUE self) {
-    sp800_185_context_t *context;
-    get_cshake_context(self, &context);
-
-    VALUE data = argc > 0 ? argv[0] : Qnil;
-
-    return sp800_185_hexdigest(context, data);
-}
+DEFINE_SP800_185_VARARGS_METHOD(rb_sha3_cshake_hexdigest, sp800_185_rb_hexdigest, get_cshake_context)
 
 /*
  * :call-seq:
@@ -369,12 +301,7 @@ static VALUE rb_sha3_cshake_hexdigest(int argc, VALUE *argv, VALUE self) {
  * = example
  *   cshake.squeeze(32)
  */
-static VALUE rb_sha3_cshake_squeeze(VALUE self, VALUE length) {
-    sp800_185_context_t *context;
-    get_cshake_context(self, &context);
-
-    return sp800_185_squeeze(context, length);
-}
+DEFINE_SP800_185_VALUE_METHOD(rb_sha3_cshake_squeeze, sp800_185_rb_squeeze, get_cshake_context)
 
 /*
  * :call-seq:
@@ -388,9 +315,4 @@ static VALUE rb_sha3_cshake_squeeze(VALUE self, VALUE length) {
  * = example
  *   cshake.hex_squeeze(32)
  */
-static VALUE rb_sha3_cshake_hex_squeeze(VALUE self, VALUE length) {
-    sp800_185_context_t *context;
-    get_cshake_context(self, &context);
-
-    return sp800_185_hex_squeeze(context, length);
-}
+DEFINE_SP800_185_VALUE_METHOD(rb_sha3_cshake_hex_squeeze, sp800_185_rb_hex_squeeze, get_cshake_context)

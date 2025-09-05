@@ -74,12 +74,12 @@ const sp800_185_function_table_t *sp800_185_get_algorithm_by_name(const char *na
 
 // Generic context allocation function
 sp800_185_context_t *sp800_185_alloc_context(size_t context_size, size_t state_size) {
-    sp800_185_context_t *context = (sp800_185_context_t *)malloc(context_size);
+    sp800_185_context_t *context = (sp800_185_context_t *)ruby_xmalloc(context_size);
     if (!context) return NULL;
 
-    context->state = calloc(1, state_size);
+    context->state = ruby_xcalloc(1, state_size);
     if (!context->state) {
-        free(context);
+        ruby_xfree(context);
         return NULL;
     }
 
@@ -92,9 +92,9 @@ sp800_185_context_t *sp800_185_alloc_context(size_t context_size, size_t state_s
 void sp800_185_free_context(sp800_185_context_t *context) {
     if (context) {
         if (context->state) {
-            free(context->state);
+            ruby_xfree(context->state);
         }
-        free(context);
+        ruby_xfree(context);
     }
 }
 
@@ -112,7 +112,7 @@ void *sp800_185_copy_state(sp800_185_context_t *context) {
     if (context->functions->state_size <= 0) {
         rb_raise(context->error_class, "invalid state size");
     }
-    void *state_copy = malloc(context->functions->state_size);
+    void *state_copy = ruby_xmalloc(context->functions->state_size);
 
     if (!state_copy) {
         rb_raise(rb_eNoMemError, "failed to allocate memory for state copy");
@@ -125,6 +125,12 @@ void *sp800_185_copy_state(sp800_185_context_t *context) {
 
 VALUE sp800_185_update(sp800_185_context_t *context, VALUE data) {
     StringValue(data);
+
+    // Check for NULL data pointer
+    if (RSTRING_PTR(data) == NULL && RSTRING_LEN(data) > 0) {
+        rb_raise(context->error_class, "cannot update with NULL data");
+    }
+
     size_t data_len = (RSTRING_LEN(data) * 8);
 
     if (data_len == 0) {
@@ -172,7 +178,7 @@ VALUE sp800_185_digest(sp800_185_context_t *context, VALUE data) {
     }
 
     // Create a copy of the state for processing
-    void *state_copy = malloc(context->functions->state_size);
+    void *state_copy = ruby_xmalloc(context->functions->state_size);
     if (!state_copy) {
         rb_raise(rb_eNoMemError, "failed to allocate memory for state copy");
     }
@@ -190,7 +196,7 @@ VALUE sp800_185_digest(sp800_185_context_t *context, VALUE data) {
             result = context->functions->update(state_copy, (const BitSequence *)RSTRING_PTR(data), data_len);
 
             if (result != 0) {
-                free(state_copy);
+                ruby_xfree(state_copy);
                 rb_raise(context->error_class, "failed to update %s state", context->functions->name);
             }
         }
@@ -201,7 +207,7 @@ VALUE sp800_185_digest(sp800_185_context_t *context, VALUE data) {
 
     result = context->functions->final(state_copy, (BitSequence *)RSTRING_PTR(output));
 
-    free(state_copy);
+    ruby_xfree(state_copy);
 
     if (result != 0) {
         rb_raise(context->error_class, "failed to finalize %s state", context->functions->name);
@@ -220,18 +226,23 @@ VALUE sp800_185_squeeze(sp800_185_context_t *context, VALUE length) {
         rb_raise(context->error_class, "use digest methods for fixed-length output");
     }
 
-    size_t output_byte_len;
+    long output_byte_len;
     VALUE str;
 
     Check_Type(length, T_FIXNUM);
-    output_byte_len = NUM2ULONG(length);
+    output_byte_len = NUM2LONG(length);
 
     if (output_byte_len <= 0) {
-        rb_raise(context->error_class, "output length must be specified");
+        rb_raise(context->error_class, "output length must be positive");
+    }
+
+    // Limit output to 1MB for safety
+    if (output_byte_len > (1L << 20)) {
+        rb_raise(context->error_class, "output length too large (max 1MB)");
     }
 
     // Create a copy of the state for processing
-    void *state_copy = malloc(context->functions->state_size);
+    void *state_copy = ruby_xmalloc(context->functions->state_size);
     if (!state_copy) {
         rb_raise(rb_eNoMemError, "failed to allocate memory for state copy");
     }
@@ -245,7 +256,7 @@ VALUE sp800_185_squeeze(sp800_185_context_t *context, VALUE length) {
     result = context->functions->final(state_copy, (BitSequence *)RSTRING_PTR(dummy_output));
 
     if (result != 0) {
-        free(state_copy);
+        ruby_xfree(state_copy);
         rb_raise(context->error_class, "failed to finalize %s state", context->functions->name);
     }
 
@@ -255,7 +266,7 @@ VALUE sp800_185_squeeze(sp800_185_context_t *context, VALUE length) {
     // Use the function table to call the appropriate squeeze function
     result = context->functions->squeeze(state_copy, (BitSequence *)RSTRING_PTR(str), output_byte_len * 8);
 
-    free(state_copy);
+    ruby_xfree(state_copy);
 
     if (result != 0) {
         rb_raise(context->error_class, "failed to squeeze %s", context->functions->name);
@@ -267,4 +278,25 @@ VALUE sp800_185_squeeze(sp800_185_context_t *context, VALUE length) {
 VALUE sp800_185_hex_squeeze(sp800_185_context_t *context, VALUE length) {
     VALUE binary_result = sp800_185_squeeze(context, length);
     return rb_funcall(binary_result, rb_intern("unpack1"), 1, rb_str_new2("H*"));
+}
+
+/* Ruby wrapper functions for common method patterns */
+
+VALUE sp800_185_rb_update(sp800_185_context_t *context, VALUE data) {
+    sp800_185_update(context, data);
+    return Qnil;  // Caller will return self
+}
+
+VALUE sp800_185_rb_name(sp800_185_context_t *context) { return rb_str_new2(sp800_185_name(context)); }
+
+VALUE sp800_185_rb_finish(sp800_185_context_t *context, VALUE output) { return sp800_185_finish(context, output); }
+
+VALUE sp800_185_rb_digest(sp800_185_context_t *context, VALUE data) { return sp800_185_digest(context, data); }
+
+VALUE sp800_185_rb_hexdigest(sp800_185_context_t *context, VALUE data) { return sp800_185_hexdigest(context, data); }
+
+VALUE sp800_185_rb_squeeze(sp800_185_context_t *context, VALUE length) { return sp800_185_squeeze(context, length); }
+
+VALUE sp800_185_rb_hex_squeeze(sp800_185_context_t *context, VALUE length) {
+    return sp800_185_hex_squeeze(context, length);
 }

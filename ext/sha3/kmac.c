@@ -1,5 +1,6 @@
 #include "kmac.h"
 
+#include "common.h"
 #include "sha3.h"
 #include "sp800_185.h"
 
@@ -42,7 +43,7 @@ static ID _kmac_128_id;
 static ID _kmac_256_id;
 
 /* TypedData structure for sha3_kmac_context_t */
-const rb_data_type_t sha3_kmac_data_type_t = {
+const rb_data_type_t sha3_kmac_data_type = {
     "SHA3::KMAC",
     {
         NULL, sha3_kmac_free_context, sha3_kmac_context_size, NULL, /* dcompact field */
@@ -55,7 +56,7 @@ const rb_data_type_t sha3_kmac_data_type_t = {
 // Helper function to extract context from a Ruby object
 void get_kmac_context(VALUE obj, sp800_185_context_t **context) {
     sha3_kmac_context_t *kmac_ctx;
-    TypedData_Get_Struct(obj, sha3_kmac_context_t, &sha3_kmac_data_type_t, kmac_ctx);
+    TypedData_Get_Struct(obj, sha3_kmac_context_t, &sha3_kmac_data_type, kmac_ctx);
     *context = &kmac_ctx->base;
 }
 
@@ -104,25 +105,11 @@ void Init_sha3_kmac(void) {
     return;
 }
 
-static void sha3_kmac_free_context(void *ptr) { sp800_185_free_context((sp800_185_context_t *)ptr); }
+/* Use common memory management functions */
+DEFINE_SP800_185_MEMORY_FUNCS(sha3_kmac, sha3_kmac_context_t)
 
-static size_t sha3_kmac_context_size(const void *ptr) {
-    return sp800_185_context_size((const sp800_185_context_t *)ptr, sizeof(sha3_kmac_context_t));
-}
-
-static VALUE rb_sha3_kmac_alloc(VALUE klass) {
-    sha3_kmac_context_t *context =
-        (sha3_kmac_context_t *)sp800_185_alloc_context(sizeof(sha3_kmac_context_t), sizeof(KMAC_Instance));
-
-    if (!context) {
-        rb_raise(_sha3_kmac_error_class, "failed to allocate memory");
-    }
-
-    // Create the Ruby object with TypedData - this will automatically handle freeing
-    VALUE obj = TypedData_Wrap_Struct(klass, &sha3_kmac_data_type_t, context);
-
-    return obj;
-}
+/* Use common allocation function */
+DEFINE_SP800_185_ALLOC(sha3_kmac, sha3_kmac_context_t, KMAC_Instance, _sha3_kmac_error_class)
 
 /*
  * :call-seq:
@@ -179,7 +166,7 @@ static VALUE rb_sha3_kmac_init(int argc, VALUE *argv, VALUE self) {
     }
 
     sha3_kmac_context_t *context;
-    TypedData_Get_Struct(self, sha3_kmac_context_t, &sha3_kmac_data_type_t, context);
+    TypedData_Get_Struct(self, sha3_kmac_context_t, &sha3_kmac_data_type, context);
 
     // Store the output length in bits
     context->base.output_length = NUM2ULONG(output_length) * 8;
@@ -229,31 +216,7 @@ static VALUE rb_sha3_kmac_init(int argc, VALUE *argv, VALUE self) {
  * = example
  *   new_kmac = kmac.dup
  */
-static VALUE rb_sha3_kmac_copy(VALUE self, VALUE other) {
-    sha3_kmac_context_t *context, *other_context;
-
-    rb_check_frozen(self);
-    if (self == other) {
-        return self;
-    }
-
-    if (!rb_obj_is_kind_of(other, _sha3_kmac_class)) {
-        rb_raise(rb_eTypeError, "wrong argument (%s)! (expected %s)", rb_obj_classname(other),
-                 rb_class2name(_sha3_kmac_class));
-    }
-
-    TypedData_Get_Struct(other, sha3_kmac_context_t, &sha3_kmac_data_type_t, other_context);
-    TypedData_Get_Struct(self, sha3_kmac_context_t, &sha3_kmac_data_type_t, context);
-
-    // Copy the base context attributes
-    context->base.functions = other_context->base.functions;
-    context->base.output_length = other_context->base.output_length;
-
-    // Copy the algorithm-specific state
-    memcpy(context->base.state, other_context->base.state, context->base.functions->state_size);
-
-    return self;
-}
+DEFINE_SP800_185_COPY_METHOD(rb_sha3_kmac_copy, sha3_kmac_context_t, sha3_kmac_data_type, _sha3_kmac_class)
 
 /*
  * :call-seq:
@@ -268,13 +231,7 @@ static VALUE rb_sha3_kmac_copy(VALUE self, VALUE other) {
  *   kmac.update("more data")
  *   kmac << "more data"  # alias for update
  */
-static VALUE rb_sha3_kmac_update(VALUE self, VALUE data) {
-    sp800_185_context_t *context;
-    get_kmac_context(self, &context);
-    sp800_185_update(context, data);
-
-    return self;
-}
+DEFINE_SP800_185_SIMPLE_METHOD(rb_sha3_kmac_update, sp800_185_rb_update, get_kmac_context)
 
 /*
  * :call-seq:
@@ -285,12 +242,7 @@ static VALUE rb_sha3_kmac_update(VALUE self, VALUE data) {
  * = example
  *   kmac.name  #=> "KMAC128" or "KMAC256"
  */
-static VALUE rb_sha3_kmac_name(VALUE self) {
-    sp800_185_context_t *context;
-    get_kmac_context(self, &context);
-
-    return rb_str_new2(sp800_185_name(context));
-}
+DEFINE_SP800_185_RETURN_METHOD(rb_sha3_kmac_name, sp800_185_rb_name, get_kmac_context)
 
 /*
  * :call-seq:
@@ -304,14 +256,7 @@ static VALUE rb_sha3_kmac_name(VALUE self) {
  * = example
  *   kmac.finish
  */
-static VALUE rb_sha3_kmac_finish(int argc, VALUE *argv, VALUE self) {
-    sp800_185_context_t *context;
-    get_kmac_context(self, &context);
-
-    VALUE output = argc > 0 ? argv[0] : Qnil;
-
-    return sp800_185_finish(context, output);
-}
+DEFINE_SP800_185_VARARGS_METHOD(rb_sha3_kmac_finish, sp800_185_rb_finish, get_kmac_context)
 
 /*
  * :call-seq:
@@ -329,14 +274,7 @@ static VALUE rb_sha3_kmac_finish(int argc, VALUE *argv, VALUE self) {
  *   kmac.digest
  *   kmac.digest('final chunk')
  */
-static VALUE rb_sha3_kmac_digest(int argc, VALUE *argv, VALUE self) {
-    sp800_185_context_t *context;
-    get_kmac_context(self, &context);
-
-    VALUE data = argc > 0 ? argv[0] : Qnil;
-
-    return sp800_185_digest(context, data);
-}
+DEFINE_SP800_185_VARARGS_METHOD(rb_sha3_kmac_digest, sp800_185_rb_digest, get_kmac_context)
 
 /*
  * :call-seq:
@@ -354,14 +292,7 @@ static VALUE rb_sha3_kmac_digest(int argc, VALUE *argv, VALUE self) {
  *   kmac.hexdigest
  *   kmac.hexdigest('final chunk')
  */
-static VALUE rb_sha3_kmac_hexdigest(int argc, VALUE *argv, VALUE self) {
-    sp800_185_context_t *context;
-    get_kmac_context(self, &context);
-
-    VALUE data = argc > 0 ? argv[0] : Qnil;
-
-    return sp800_185_hexdigest(context, data);
-}
+DEFINE_SP800_185_VARARGS_METHOD(rb_sha3_kmac_hexdigest, sp800_185_rb_hexdigest, get_kmac_context)
 
 /*
  * :call-seq:
@@ -377,12 +308,7 @@ static VALUE rb_sha3_kmac_hexdigest(int argc, VALUE *argv, VALUE self) {
  * = example
  *   kmac.squeeze(128)
  */
-static VALUE rb_sha3_kmac_squeeze(VALUE self, VALUE length) {
-    sp800_185_context_t *context;
-    get_kmac_context(self, &context);
-
-    return sp800_185_squeeze(context, length);
-}
+DEFINE_SP800_185_VALUE_METHOD(rb_sha3_kmac_squeeze, sp800_185_rb_squeeze, get_kmac_context)
 
 /*
  * :call-seq:
@@ -398,12 +324,7 @@ static VALUE rb_sha3_kmac_squeeze(VALUE self, VALUE length) {
  * = example
  *   kmac.hex_squeeze(128)
  */
-static VALUE rb_sha3_kmac_hex_squeeze(VALUE self, VALUE length) {
-    sp800_185_context_t *context;
-    get_kmac_context(self, &context);
-
-    return sp800_185_hex_squeeze(context, length);
-}
+DEFINE_SP800_185_VALUE_METHOD(rb_sha3_kmac_hex_squeeze, sp800_185_rb_hex_squeeze, get_kmac_context)
 
 /*
  * :call-seq:
@@ -432,7 +353,7 @@ static VALUE rb_sha3_kmac_self_digest(int argc, VALUE *argv, VALUE klass) {
     rb_scan_args(argc, argv, "41", &algorithm, &data, &output_length, &key, &customization);
 
     Check_Type(output_length, T_FIXNUM);
-    if (!NIL_P(output_length) && output_length <= INT2FIX(0)) {
+    if (!NIL_P(output_length) && NUM2INT(output_length) <= 0) {
         rb_raise(rb_eArgError, "class method digest does not support XOF mode");
     }
 
@@ -468,7 +389,7 @@ static VALUE rb_sha3_kmac_self_hexdigest(int argc, VALUE *argv, VALUE klass) {
     rb_scan_args(argc, argv, "41", &algorithm, &data, &output_length, &key, &customization);
 
     Check_Type(output_length, T_FIXNUM);
-    if (!NIL_P(output_length) && output_length <= INT2FIX(0)) {
+    if (!NIL_P(output_length) && NUM2INT(output_length) <= 0) {
         rb_raise(rb_eArgError, "class method hexdigest does not support XOF mode");
     }
 
