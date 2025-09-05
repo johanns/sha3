@@ -1,4 +1,5 @@
 README.md
 LICENSE.txt
+CHANGELOG.md
 doc/**/*.rb
 ext/sha3/*.c

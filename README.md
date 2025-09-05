@@ -38,6 +38,7 @@ This gem provides support for the standard SHA-3 fixed-length functions (224, 25
 - [API Documentation](https://docs.jsg.io/sha3/html/index.html)
 - [GitHub Repository](https://github.com/johanns/sha3#readme)
 - [Issue Tracker](https://github.com/johanns/sha3/issues)
+- [Changelog](CHANGELOG.md)
 
 ## Features
 
