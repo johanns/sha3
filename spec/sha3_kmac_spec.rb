@@ -2,49 +2,56 @@
 
 require 'spec_helper'
 
+# Test vectors from NIST SP 800-185
+# https://csrc.nist.gov/CSRC/media/Projects/Cryptographic-Standards-and-Guidelines/documents/examples/KMAC_samples.pdf
+KMAC_TEST_VECTORS = [
+  {
+    algorithm: :kmac_128,
+    custom: '',
+    data: '00010203',
+    description: 'KMAC128 Empty Customization',
+    hex_output: 'e5780b0d3ea6f7d3a429c5706aa43a00fadbd7d49628839e3187243f456ee14e',
+    key: '404142434445464748494A4B4C4D4E4F505152535455565758595A5B5C5D5E5F',
+    length: 32
+  },
+  {
+    algorithm: :kmac_128,
+    custom: 'My Tagged Application',
+    data: '00010203',
+    description: 'KMAC128 Non-Empty Customization',
+    hex_output: '3b1fba963cd8b0b59e8c1a6d71888b7143651af8ba0a7070c0979e2811324aa5',
+    length: 32,
+    key: '404142434445464748494A4B4C4D4E4F505152535455565758595A5B5C5D5E5F'
+  },
+  {
+    algorithm: :kmac_256,
+    custom: '',
+    data: '000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f' \
+          '202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f' \
+          '404142434445464748494a4b4c4d4e4f505152535455565758595a5b5c5d5e5f' \
+          '606162636465666768696a6b6c6d6e6f707172737475767778797a7b7c7d7e7f' \
+          '808182838485868788898a8b8c8d8e8f909192939495969798999a9b9c9d9e9f' \
+          'a0a1a2a3a4a5a6a7a8a9aaabacadaeafb0b1b2b3b4b5b6b7b8b9babbbcbdbebf' \
+          'c0c1c2c3c4c5c6c7',
+    description: 'KMAC256 Empty Customization',
+    hex_output: '75358cf39e41494e949707927cee0af20a3ff553904c86b08f21cc414bcfd691' \
+                '589d27cf5e15369cbbff8b9a4c2eb17800855d0235ff635da82533ec6b759b69',
+    length: 64,
+    key: '404142434445464748494A4B4C4D4E4F505152535455565758595A5B5C5D5E5F'
+  },
+  {
+    algorithm: :kmac_256,
+    custom: 'My Tagged Application',
+    data: '00010203',
+    description: 'KMAC256 Non-Empty Customization',
+    hex_output: '20c570c31346f703c9ac36c61c03cb64c3970d0cfc787e9b79599d273a68d2f7' \
+                'f69d4cc3de9d104a351689f27cf6f5951f0103f33f4f24871024d9c27773a8dd',
+    length: 64,
+    key: '404142434445464748494A4B4C4D4E4F505152535455565758595A5B5C5D5E5F'
+  }
+].freeze
+
 RSpec.describe SHA3::KMAC do
-  # Test vectors from NIST SP 800-185
-  # https://csrc.nist.gov/CSRC/media/Projects/Cryptographic-Standards-and-Guidelines/documents/examples/KMAC_samples.pdf
-
-  KMAC_TEST_VECTORS = [
-    {
-      algorithm: :kmac_128,
-      custom: '',
-      data: '00010203',
-      description: 'KMAC128 Empty Customization',
-      hex_output: 'e5780b0d3ea6f7d3a429c5706aa43a00fadbd7d49628839e3187243f456ee14e',
-      key: '404142434445464748494A4B4C4D4E4F505152535455565758595A5B5C5D5E5F',
-      length: 32
-    },
-    {
-      algorithm: :kmac_128,
-      custom: 'My Tagged Application',
-      data: '00010203',
-      description: 'KMAC128 Non-Empty Customization',
-      hex_output: '3b1fba963cd8b0b59e8c1a6d71888b7143651af8ba0a7070c0979e2811324aa5',
-      length: 32,
-      key: '404142434445464748494A4B4C4D4E4F505152535455565758595A5B5C5D5E5F'
-    },
-    {
-      algorithm: :kmac_256,
-      custom: '',
-      data: '000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f404142434445464748494a4b4c4d4e4f505152535455565758595a5b5c5d5e5f606162636465666768696a6b6c6d6e6f707172737475767778797a7b7c7d7e7f808182838485868788898a8b8c8d8e8f909192939495969798999a9b9c9d9e9fa0a1a2a3a4a5a6a7a8a9aaabacadaeafb0b1b2b3b4b5b6b7b8b9babbbcbdbebfc0c1c2c3c4c5c6c7',
-      description: 'KMAC256 Empty Customization',
-      hex_output: '75358cf39e41494e949707927cee0af20a3ff553904c86b08f21cc414bcfd691589d27cf5e15369cbbff8b9a4c2eb17800855d0235ff635da82533ec6b759b69',
-      length: 64,
-      key: '404142434445464748494A4B4C4D4E4F505152535455565758595A5B5C5D5E5F'
-    },
-    {
-      algorithm: :kmac_256,
-      custom: 'My Tagged Application',
-      data: '00010203',
-      description: 'KMAC256 Non-Empty Customization',
-      hex_output: '20c570c31346f703c9ac36c61c03cb64c3970d0cfc787e9b79599d273a68d2f7f69d4cc3de9d104a351689f27cf6f5951f0103f33f4f24871024d9c27773a8dd',
-      length: 64,
-      key: '404142434445464748494A4B4C4D4E4F505152535455565758595A5B5C5D5E5F'
-    }
-  ].freeze
-
   describe '.new' do
     it 'initializes with required parameters' do
       expect { described_class.new(:kmac_128, 32, 'my key') }.not_to raise_error
@@ -212,7 +219,7 @@ RSpec.describe SHA3::KMAC do
     it 'produces different outputs for different customization strings' do
       data = 'test data'
       key = 'secret key'
-      digest1 = described_class.digest(:kmac_128, data, 32, key, 'custom1').hex
+      digest1 = described_class.digest(:kmac_128, data, 32, key, 'custom1')
       digest2 = described_class.digest(:kmac_128, data, 32, key, 'custom2')
       expect(digest1).not_to eq(digest2)
     end
