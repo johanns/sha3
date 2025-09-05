@@ -79,15 +79,16 @@ static ID _shake_128_id;
 static ID _shake_256_id;
 
 /* TypedData structure for sha3_digest_context_t */
-const rb_data_type_t sha3_digest_data_type_t = {"SHA3::Digest",
-                                                {
-                                                    NULL,
-                                                    sha3_digest_free_context,
-                                                    sha3_digest_context_size,
-                                                },
-                                                NULL,
-                                                NULL,
-                                                RUBY_TYPED_FREE_IMMEDIATELY};
+const rb_data_type_t sha3_digest_data_type = {"SHA3::Digest",
+                                              {
+                                                  NULL,
+                                                  sha3_digest_free_context,
+                                                  sha3_digest_context_size,
+                                                  NULL,
+                                              },
+                                              NULL,
+                                              NULL,
+                                              RUBY_TYPED_FREE_IMMEDIATELY};
 
 void Init_sha3_digest(void) {
     rb_require("digest");
@@ -154,9 +155,13 @@ void Init_sha3_digest(void) {
 
 // Static inline functions replacing macros
 static inline void get_sha3_digest_context(VALUE obj, sha3_digest_context_t **context) {
-    TypedData_Get_Struct((obj), sha3_digest_context_t, &sha3_digest_data_type_t, (*context));
+    TypedData_Get_Struct((obj), sha3_digest_context_t, &sha3_digest_data_type, (*context));
     if (!(*context)) {
         rb_raise(rb_eRuntimeError, "Digest data not initialized!");
+    }
+
+    if (!(*context)->state) {
+        rb_raise(rb_eRuntimeError, "Digest state not initialized!");
     }
 }
 
@@ -170,36 +175,36 @@ static inline void safe_get_sha3_digest_context(VALUE obj, sha3_digest_context_t
 
 static inline int is_shake_algorithm(sha3_digest_algorithms alg) { return alg == SHAKE_128 || alg == SHAKE_256; }
 
-int get_hashbit_length(VALUE obj, sha3_digest_algorithms *algorithm) {
-    if (TYPE(obj) == T_SYMBOL) {
-        ID symid = SYM2ID(obj);
-
-        if (symid == _sha3_224_id) {
-            *algorithm = SHA3_224;
-            return 224;
-        } else if (symid == _sha3_256_id) {
-            *algorithm = SHA3_256;
-            return 256;
-        } else if (symid == _sha3_384_id) {
-            *algorithm = SHA3_384;
-            return 384;
-        } else if (symid == _sha3_512_id) {
-            *algorithm = SHA3_512;
-            return 512;
-        } else if (symid == _shake_128_id) {
-            *algorithm = SHAKE_128;
-            return 128;
-        } else if (symid == _shake_256_id) {
-            *algorithm = SHAKE_256;
-            return 256;
-        }
-
-        rb_raise(rb_eArgError,
-                 "invalid hash algorithm symbol (should be: :sha3_224, "
-                 ":sha3_256, :sha3_384, :sha3_512, :shake_128, or :shake_256)");
+static int get_hashbit_length(VALUE obj, sha3_digest_algorithms *algorithm) {
+    if (TYPE(obj) != T_SYMBOL) {
+        rb_raise(_sha3_digest_error_class, "hash algorithm must be a symbol");
     }
 
-    rb_raise(_sha3_digest_error_class, "unknown type value");
+    ID symid = SYM2ID(obj);
+
+    if (symid == _sha3_224_id) {
+        *algorithm = SHA3_224;
+        return 224;
+    } else if (symid == _sha3_256_id) {
+        *algorithm = SHA3_256;
+        return 256;
+    } else if (symid == _sha3_384_id) {
+        *algorithm = SHA3_384;
+        return 384;
+    } else if (symid == _sha3_512_id) {
+        *algorithm = SHA3_512;
+        return 512;
+    } else if (symid == _shake_128_id) {
+        *algorithm = SHAKE_128;
+        return 128;
+    } else if (symid == _shake_256_id) {
+        *algorithm = SHAKE_256;
+        return 256;
+    }
+
+    rb_raise(rb_eArgError,
+             "invalid hash algorithm symbol (should be: :sha3_224, "
+             ":sha3_256, :sha3_384, :sha3_512, :shake_128, or :shake_256)");
 
     return 0;  // Never reached, but silences compiler warnings
 }
@@ -208,9 +213,10 @@ static void sha3_digest_free_context(void *ptr) {
     sha3_digest_context_t *context = (sha3_digest_context_t *)ptr;
     if (context) {
         if (context->state) {
-            free(context->state);
+            ruby_xfree(context->state);
+            context->state = NULL;
         }
-        free(context);
+        ruby_xfree(context);
     }
 }
 
@@ -245,21 +251,21 @@ static HashReturn keccak_hash_initialize(sha3_digest_context_t *context) {
 }
 
 static VALUE rb_sha3_digest_alloc(VALUE klass) {
-    sha3_digest_context_t *context = (sha3_digest_context_t *)malloc(sizeof(sha3_digest_context_t));
+    sha3_digest_context_t *context = RB_ALLOC(sha3_digest_context_t);
     if (!context) {
         rb_raise(_sha3_digest_error_class, "failed to allocate object memory");
     }
 
-    context->state = (Keccak_HashInstance *)calloc(1, sizeof(Keccak_HashInstance));
+    context->state = RB_ALLOC(Keccak_HashInstance);
     if (!context->state) {
-        sha3_digest_free_context(context);
         rb_raise(_sha3_digest_error_class, "failed to allocate state memory");
     }
+    memset(context->state, 0, sizeof(*context->state));
 
-    VALUE obj = TypedData_Wrap_Struct(klass, &sha3_digest_data_type_t, context);
     context->hashbitlen = 0;
-    context->algorithm = SHA3_256;  // Default algorithm
+    context->algorithm = SHA3_256;
 
+    VALUE obj = TypedData_Wrap_Struct(klass, &sha3_digest_data_type, context);
     return obj;
 }
 
@@ -342,7 +348,13 @@ static VALUE rb_sha3_digest_update(VALUE self, VALUE data) {
         rb_raise(_sha3_digest_error_class, "cannot update with NULL data");
     }
 
-    dlen = (RSTRING_LEN(data) * 8);
+    // Prevent integer overflow and validate size
+    size_t data_len = RSTRING_LEN(data);
+    if (data_len > SIZE_MAX / 8) {
+        rb_raise(_sha3_digest_error_class, "data too large (exceeds maximum size)");
+    }
+
+    dlen = (data_len * 8);
 
     if (Keccak_HashUpdate(context->state, (BitSequence *)RSTRING_PTR(data), dlen) != KECCAK_SUCCESS) {
         rb_raise(_sha3_digest_error_class, "failed to update hash data");
@@ -374,6 +386,10 @@ static VALUE rb_sha3_digest_reset(VALUE self) {
 }
 
 static int compare_contexts(const sha3_digest_context_t *context1, const sha3_digest_context_t *context2) {
+    if (!context1 || !context2 || !context1->state || !context2->state) {
+        return 0;
+    }
+
     // First check the hashbitlen and algorithm
     if (context1->hashbitlen != context2->hashbitlen || context1->algorithm != context2->algorithm) {
         return 0;
@@ -429,7 +445,11 @@ static VALUE rb_sha3_digest_copy(VALUE self, VALUE other) {
     }
 
     safe_get_sha3_digest_context(other, &other_context);
-    get_sha3_digest_context(self, &context);
+    safe_get_sha3_digest_context(self, &context);
+
+    if (!context || !other_context) {
+        rb_raise(_sha3_digest_error_class, "invalid context for copy");
+    }
 
     context->hashbitlen = other_context->hashbitlen;
     context->algorithm = other_context->algorithm;
@@ -489,17 +509,17 @@ static VALUE rb_sha3_digest_name(VALUE self) {
 
     switch (context->algorithm) {
         case SHA3_224:
-            return rb_str_new2("SHA3-224");
+            return rb_str_new_cstr("SHA3-224");
         case SHA3_256:
-            return rb_str_new2("SHA3-256");
+            return rb_str_new_cstr("SHA3-256");
         case SHA3_384:
-            return rb_str_new2("SHA3-384");
+            return rb_str_new_cstr("SHA3-384");
         case SHA3_512:
-            return rb_str_new2("SHA3-512");
+            return rb_str_new_cstr("SHA3-512");
         case SHAKE_128:
-            return rb_str_new2("SHAKE128");
+            return rb_str_new_cstr("SHAKE128");
         case SHAKE_256:
-            return rb_str_new2("SHAKE256");
+            return rb_str_new_cstr("SHAKE256");
         default:
             rb_raise(_sha3_digest_error_class, "unknown algorithm");
     }
@@ -560,13 +580,17 @@ static VALUE rb_sha3_digest_finish(int argc, VALUE *argv, VALUE self) {
 static VALUE rb_sha3_digest_squeeze(VALUE self, VALUE length) {
     sha3_digest_context_t *context;
     VALUE str, copy;
-    int output_bytes;
+    long output_bytes;
 
     Check_Type(length, T_FIXNUM);
-    output_bytes = NUM2INT(length);
+    output_bytes = NUM2LONG(length);
 
     if (output_bytes <= 0) {
         rb_raise(_sha3_digest_error_class, "output length must be positive");
+    }
+
+    if (output_bytes > (1L << 20)) {  // Limit to 1MB output
+        rb_raise(_sha3_digest_error_class, "output length too large (max 1MB)");
     }
 
     get_sha3_digest_context(self, &context);
@@ -578,6 +602,9 @@ static VALUE rb_sha3_digest_squeeze(VALUE self, VALUE length) {
 
     // Create a copy of the digest object to avoid modifying the original
     copy = rb_obj_clone(self);
+    if (NIL_P(copy)) {
+        rb_raise(_sha3_digest_error_class, "failed to clone digest object");
+    }
 
     // Get the sha3_digest_context_t struct from the copy
     sha3_digest_context_t *context_copy;
@@ -615,7 +642,7 @@ static VALUE rb_sha3_digest_hex_squeeze(VALUE self, VALUE length) {
     // Get the binary output using the existing squeeze function
     VALUE bin_str = rb_sha3_digest_squeeze(self, length);
     // Use Ruby's built-in unpack method to convert to hex
-    return rb_funcall(bin_str, rb_intern("unpack1"), 1, rb_str_new2("H*"));
+    return rb_funcall(bin_str, rb_intern("unpack1"), 1, rb_str_new_cstr("H*"));
 }
 
 static VALUE prepare_shake_output(VALUE self, int argc, VALUE *argv, int hex_output) {
@@ -800,32 +827,26 @@ static VALUE rb_sha3_digest_self_digest(VALUE klass, VALUE name, VALUE data) {
  * To squeeze a different length, use #hex_squeeze instance method.
  */
 static VALUE rb_sha3_digest_self_hexdigest(VALUE klass, VALUE name, VALUE data) {
-    VALUE args[2];
+    VALUE digest;
 
-    // Need to add type checking for the data parameter
-    StringValue(data);
-
-    /* For SHAKE algorithms, we need to handle them differently */
-    if (TYPE(name) == T_SYMBOL) {
-        ID symid = SYM2ID(name);
-        if (symid == _shake_128_id || symid == _shake_256_id) {
-            /* Create a new digest instance with the specified algorithm */
-            VALUE digest = rb_class_new_instance(1, &name, klass);
-
-            /* Update it with the data */
-            rb_sha3_digest_update(digest, data);
-
-            /* For SHAKE algorithms, use a default output length based on the security strength */
-            int output_length = (symid == _shake_128_id) ? 16 : 32; /* 128/8 or 256/8 */
-
-            /* Return the hexadecimal representation of the squeezed output */
-            return rb_sha3_digest_hex_squeeze(digest, INT2NUM(output_length));
-        }
+    if (NIL_P(name) || NIL_P(data)) {
+        rb_raise(_sha3_digest_error_class, "algorithm name and data cannot be nil");
     }
 
-    /* Call the superclass method with arguments in reverse order */
-    args[0] = data;
-    args[1] = name;
+    if (TYPE(name) != T_SYMBOL) {
+        rb_raise(_sha3_digest_error_class, "algorithm name must be a symbol");
+    }
 
-    return rb_call_super(2, args);
+    StringValue(data);
+
+    ID symid = SYM2ID(name);
+    digest = rb_class_new_instance(1, &name, klass);
+    rb_sha3_digest_update(digest, data);
+
+    if (symid == _shake_128_id || symid == _shake_256_id) {
+        int output_length = (symid == _shake_128_id) ? 16 : 32;
+        return rb_sha3_digest_hex_squeeze(digest, INT2NUM(output_length));
+    }
+
+    return rb_funcall(digest, rb_intern("hexdigest"), 0);
 }
