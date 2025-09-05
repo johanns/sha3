@@ -79,16 +79,18 @@ static ID _shake_128_id;
 static ID _shake_256_id;
 
 /* TypedData structure for sha3_digest_context_t */
-const rb_data_type_t sha3_digest_data_type = {"SHA3::Digest",
-                                              {
-                                                  NULL,
-                                                  sha3_digest_free_context,
-                                                  sha3_digest_context_size,
-                                                  NULL,
-                                              },
-                                              NULL,
-                                              NULL,
-                                              RUBY_TYPED_FREE_IMMEDIATELY};
+const rb_data_type_t sha3_digest_data_type = {
+    "SHA3::Digest",
+    {
+        NULL,
+        sha3_digest_free_context,
+        sha3_digest_context_size,
+        NULL,
+    },
+    NULL,
+    NULL,
+    RUBY_TYPED_FREE_IMMEDIATELY,
+};
 
 void Init_sha3_digest(void) {
     rb_require("digest");

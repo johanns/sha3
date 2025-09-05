@@ -49,7 +49,8 @@ static const rb_data_type_t sha3_cshake_data_type = {
     },
     NULL,
     NULL,
-    RUBY_TYPED_FREE_IMMEDIATELY};
+    RUBY_TYPED_FREE_IMMEDIATELY,
+};
 
 // Helper function to extract context from a Ruby object
 void get_cshake_context(VALUE obj, sp800_185_context_t **context) {
