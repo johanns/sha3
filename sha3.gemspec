@@ -9,11 +9,11 @@ Gem::Specification.new do |spec|
   spec.authors = ['Johanns Gregorian']
   spec.email = ['io+sha3@jsg.io']
 
-  spec.description = <<~EOF
+  spec.description = <<~DESC
     A high-performance native binding to the SHA3 (FIPS 202) cryptographic hashing algorithms, based on the XKCP - eXtended Keccak Code Package.
     This gem provides support for the standard SHA-3 fixed-length functions (224, 256, 384, and 512 bits),
     as well as the SHAKE128/SHAKE256 extendable-output functions (XOFs), cSHAKE128/256, and KMAC as specified in NIST SP 800-185.'
-  EOF
+  DESC
   spec.summary = 'SHA-3 (FIPS 202), SHAKE128/SHAKE256, cSHAKE128/cSHAKE256, and KMAC (NIST SP 800-185), powered by XKCP.'
 
   spec.homepage = 'https://github.com/johanns/sha3'
@@ -24,11 +24,11 @@ Gem::Specification.new do |spec|
   spec.metadata['homepage_uri'] = spec.homepage
   spec.metadata['documentation_uri'] = 'https://docs.jsg.io/sha3/index.html'
 
-  spec.post_install_message = <<-EOF
+  spec.post_install_message = <<-NOTICE
     [NOTICE] SHA3 version 2.0 introduces breaking changes to the API.
     Please review the changelog and ensure compatibility with your application.
     If you need the previous behavior, lock your Gemfile to version '~> 1.0'."
-  EOF
+  NOTICE
 
   spec.files = Dir.chdir(File.expand_path(__dir__)) do
     `git ls-files -z`.split("\x0").reject do |f|
