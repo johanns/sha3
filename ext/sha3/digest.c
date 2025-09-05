@@ -258,6 +258,7 @@ static VALUE rb_sha3_digest_alloc(VALUE klass) {
 
     context->state = RB_ALLOC(Keccak_HashInstance);
     if (!context->state) {
+        ruby_xfree(context);
         rb_raise(_sha3_digest_error_class, "failed to allocate state memory");
     }
     memset(context->state, 0, sizeof(*context->state));
