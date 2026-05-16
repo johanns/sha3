@@ -625,6 +625,9 @@ static VALUE rb_sha3_digest_squeeze(VALUE self, VALUE length) {
         rb_raise(_sha3_digest_error_class, "failed to squeeze output");
     }
 
+    // Keep `copy` reachable so the GC can't free context_copy->state via rb_str_new above.
+    RB_GC_GUARD(copy);
+
     return str;
 }
 
