@@ -239,6 +239,35 @@ RSpec.describe SHA3::Digest do
 
         expect(result2).to eq(result1)
       end
+
+      describe '#squeeze and #hex_squeeze' do
+        it 'returns binary and hex output of the requested length' do
+          shake = described_class.new(:shake_128)
+          shake.update(test_data)
+
+          bin = shake.squeeze(32)
+          hex = shake.hex_squeeze(32)
+
+          expect(bin.bytesize).to eq(32)
+          expect(hex.length).to eq(64)
+          expect(hex).to eq(bin.unpack1('H*'))
+        end
+
+        it 'does not advance the original state across calls' do
+          shake = described_class.new(:shake_128, test_data)
+
+          first = shake.squeeze(32)
+          second = shake.squeeze(32)
+
+          expect(second).to eq(first)
+        end
+
+        it 'rejects non-SHAKE algorithms' do
+          digest = described_class.new(:sha3_256)
+          expect { digest.squeeze(32) }.to raise_error(SHA3::Digest::Error)
+          expect { digest.hex_squeeze(32) }.to raise_error(SHA3::Digest::Error)
+        end
+      end
     end
 
     # Test block_length method
