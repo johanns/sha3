@@ -1,5 +1,13 @@
 # SHA3 Ruby Gem Changelog
 
+## v2.2.4 (2026-05-17)
+
+### Bug Fixes
+- Fixed use-after-free segfault in `SHA3::Digest#squeeze` and `#hex_squeeze` caused by GC reclaiming the cloned digest object before `Keccak_HashFinal` completed; fixed by adding `RB_GC_GUARD` to keep the cloned VALUE reachable across allocation points ([@sorah](https://github.com/sorah), [#27](https://github.com/johanns/sha3/pull/27))
+
+### Testing
+- Added RSpec coverage for `#squeeze` / `#hex_squeeze` output sizing, state preservation across calls, and rejection on non-SHAKE algorithms
+
 ## v2.2.3 (2025-09-05)
 
 ### Bug Fixes
@@ -28,7 +36,7 @@
 
 ## v2.2.1 (2025-09-05)
 
-### Bug Fixes
+### Bug Fixeshttps://github.com/johanns/sha3/pull/27
 - Fixed out-of-bounds array access when parsing optional key arguments in cSHAKE
 
 ### Maintenance
